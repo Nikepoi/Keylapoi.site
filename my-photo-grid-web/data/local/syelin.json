@@ -1,0 +1,19 @@
+{
+    "id": 3,                    // ID unik (lanjut dari 1, 2)
+    "title": "Syelin",
+    "image": "https://files.catbox.moe/ly1qkg.jpg",
+    "genre": "local",
+    "date": "2025-06-22T04:18:00Z",  // Sesuai waktu sekarang
+    "links": {
+        "videy": [
+            "aHR0cHM6Ly92aWRleS5jby92Lz9pZD1RZ1JWa3daTzE=",     // Videy 1
+            "aHR0cHM6Ly92aWRleS5jby92Lz9pZD1pem9MaUdpNTE=",     // Videy 2
+            "aHR0cHM6Ly92aWRleS5jby92Lz9pZD0yQ3dQRWFBSjE=",     // Videy 3
+            "aHR0cHM6Ly92aWRleS5jby92Lz9pZD1lOWc3N3JpQjE=",     // Videy 4
+            "aHR0cHM6Ly92aWRleS5jby92Lz9pZD1wVzRIejNXbjE="       // Videy 5
+        ],
+        "terabox": [
+            "aHR0cHM6Ly8xMDI0dGVyYWJveC5jb20vcy8xZUpucjltUGhOazMtOWZQQzNmVldnQQ=="  // Konten Lainnya Syelin
+        ]
+    }
+}
