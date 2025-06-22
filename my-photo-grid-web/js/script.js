@@ -94,7 +94,7 @@ function showOverlay(post) {
   if (post.links?.mediafire?.length > 0) {
     html += `<h4>Download via Mediafire</h4><ul>`;
     post.links.mediafire.forEach((link, i) => {
-      html += `<li><a class="download-button" href="${decodeUrl(link)}" target="_blank">Mediafire ${i + 1}</a></li>`;
+      html += `<li><a class="download-button" href="${decodeUrl(link)}" target="_blank">Full Konten</a></li>`;
     });
     html += `</ul>`;
   }
@@ -102,7 +102,7 @@ function showOverlay(post) {
   if (post.links?.pixeldrain?.length > 0) {
     html += `<h4>Download via PixelDrain</h4><ul>`;
     post.links.pixeldrain.forEach((link, i) => {
-      html += `<li><a class="download-button" href="${decodeUrl(link)}" target="_blank">Pixeldrain ${i + 1}</a></li>`;
+      html += `<li><a class="download-button" href="${decodeUrl(link)}" target="_blank">Pixeldrain</a></li>`;
     });
     html += `</ul>`;
   }
