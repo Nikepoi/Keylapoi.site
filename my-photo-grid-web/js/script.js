@@ -60,7 +60,7 @@ function showOverlay(post) {
   const content = document.getElementById('overlayContent');
 
   let html = `
-    <img src="${post.image}" alt="${post.title}">
+    <img src="${post.image}" alt="${post.title}" style="width: 100%; height: auto; max-height: 60vh; object-fit: contain;" />
     <h3>${post.title}</h3>
   `;
 
