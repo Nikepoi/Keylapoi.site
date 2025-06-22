@@ -3,7 +3,18 @@ let currentPage = 1;
 const postsPerPage = 20;
 
 function decodeUrl(encodedUrl) {
-  return atob(encodedUrl);
+  try {
+    const decoded = atob(encodedUrl);
+    const url = new URL(decoded);
+    const hostname = url.hostname;
+    const targetDomains = ['videy.co', 'mediafire', 'terabox', 'pixeldrain'];
+
+    const isTarget = targetDomains.some(domain => hostname.includes(domain));
+    return isTarget ? `https://www.keylapoi.site/safelink.html?url=${encodedUrl}` : decoded;
+  } catch (e) {
+    console.error("Gagal decode:", encodedUrl);
+    return "#";
+  }
 }
 
 async function loadPosts(genre = 'all') {
@@ -76,6 +87,22 @@ function showOverlay(post) {
     html += `<h4>Download via Terabox</h4><ul>`;
     post.links.terabox.forEach(link => {
       html += `<li><a class="download-button" href="${decodeUrl(link)}" target="_blank">Full Konten</a></li>`;
+    });
+    html += `</ul>`;
+  }
+
+  if (post.links?.mediafire?.length > 0) {
+    html += `<h4>Download via Mediafire</h4><ul>`;
+    post.links.mediafire.forEach((link, i) => {
+      html += `<li><a class="download-button" href="${decodeUrl(link)}" target="_blank">Mediafire ${i + 1}</a></li>`;
+    });
+    html += `</ul>`;
+  }
+
+  if (post.links?.pixeldrain?.length > 0) {
+    html += `<h4>Download via PixelDrain</h4><ul>`;
+    post.links.pixeldrain.forEach((link, i) => {
+      html += `<li><a class="download-button" href="${decodeUrl(link)}" target="_blank">Pixeldrain ${i + 1}</a></li>`;
     });
     html += `</ul>`;
   }
