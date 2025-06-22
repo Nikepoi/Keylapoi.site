@@ -1,13 +1,11 @@
 let posts = [];
 let currentPage = 1;
-const postsPerPage = 30; // 3 kolom × 10 baris
+const postsPerPage = 20; // ✅ 2 kolom × 10 baris
 
-// Decode base64 untuk link download
 function decodeUrl(encodedUrl) {
   return atob(encodedUrl);
 }
 
-// Fungsi utama untuk load semua post
 async function loadPosts(genre = 'all') {
   posts = [];
   const loadedIds = new Set();
@@ -21,7 +19,6 @@ async function loadPosts(genre = 'all') {
       const res = await fetch(filePath);
       if (res.ok) {
         const post = await res.json();
-        // Filter berdasarkan genre jika bukan 'all'
         if (genre === 'all' || post.genre === genre) {
           if (!loadedIds.has(post.id)) {
             loadedIds.add(post.id);
@@ -39,7 +36,6 @@ async function loadPosts(genre = 'all') {
   }
 }
 
-// Tampilkan post ke grid
 function displayPosts(postsToShow) {
   const gridContainer = document.getElementById('postGrid');
   gridContainer.innerHTML = '';
@@ -73,7 +69,6 @@ function displayPosts(postsToShow) {
   });
 }
 
-// Pagination handler
 function updatePagination() {
   document.getElementById('prevBtn').style.display = currentPage > 1 ? 'inline-block' : 'none';
   document.getElementById('nextBtn').style.display = posts.length > currentPage * postsPerPage ? 'inline-block' : 'none';
@@ -99,13 +94,11 @@ function nextPage() {
   }
 }
 
-// Filter genre
 function filterPosts(genre) {
   currentPage = 1;
   loadPosts(genre);
 }
 
-// Menu toggle
 function toggleMenu() {
   const menu = document.getElementById('navMenu');
   menu.classList.toggle('active');
@@ -121,5 +114,4 @@ function outsideClickListener(event) {
   }
 }
 
-// Mulai load saat halaman dibuka
 window.addEventListener('load', () => loadPosts('all'));
