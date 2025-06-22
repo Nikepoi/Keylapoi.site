@@ -18,7 +18,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 2px solid #000; /* Gaya favorit lo */
+    border-bottom: 2px solid #000;
     position: sticky;
     top: 0;
     z-index: 1000;
@@ -72,7 +72,7 @@ body {
 /* Grid Post Container */
 .grid-container {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, 1fr); /* ✅ 3 kolom per baris */
     gap: 1rem;
     padding: 1rem;
     max-width: 1200px;
@@ -86,7 +86,7 @@ body {
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     text-align: center;
     padding: 1rem;
-    border: 1px solid #000000; /* Gaya favorit */
+    border: 1px solid #000000;
     transition: transform 0.2s;
 }
 
@@ -122,7 +122,6 @@ body {
     padding: 0;
 }
 
-/* Tombol Download */
 .grid-item .download-button {
     display: block;
     padding: 14px 0;
