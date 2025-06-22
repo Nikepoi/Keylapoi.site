@@ -1,6 +1,6 @@
 let posts = [];
 let currentPage = 1;
-const postsPerPage = 20; // ✅ 2 kolom × 10 baris
+const postsPerPage = 20;
 
 function decodeUrl(encodedUrl) {
   return atob(encodedUrl);
@@ -39,34 +39,58 @@ async function loadPosts(genre = 'all') {
 function displayPosts(postsToShow) {
   const gridContainer = document.getElementById('postGrid');
   gridContainer.innerHTML = '';
+
   postsToShow.forEach(post => {
     const postElement = document.createElement('div');
     postElement.classList.add('grid-item');
 
-    let content = `
-      <img src="${post.image}" alt="${post.title}" loading="lazy">
-      <h3>${post.title}</h3>
-    `;
+    const img = document.createElement('img');
+    img.src = post.image;
+    img.alt = post.title;
+    img.loading = "lazy";
+    img.onclick = () => showOverlay(post);
 
-    if (post.links?.videy?.length > 0) {
-      content += `<h4>Download via Videy</h4><ul>`;
-      post.links.videy.forEach((link, i) => {
-        content += `<li><a class="download-button" href="${decodeUrl(link)}" target="_blank">Videy ${i + 1}</a></li>`;
-      });
-      content += `</ul>`;
-    }
-
-    if (post.links?.terabox?.length > 0) {
-      content += `<h4>Download via Terabox</h4><ul>`;
-      post.links.terabox.forEach(link => {
-        content += `<li><a class="download-button" href="${decodeUrl(link)}" target="_blank">Full Konten</a></li>`;
-      });
-      content += `</ul>`;
-    }
-
-    postElement.innerHTML = content;
+    postElement.appendChild(img);
     gridContainer.appendChild(postElement);
   });
+}
+
+function showOverlay(post) {
+  const overlay = document.getElementById('overlay');
+  const content = document.getElementById('overlayContent');
+
+  let html = `
+    <img src="${post.image}" alt="${post.title}">
+    <h3>${post.title}</h3>
+  `;
+
+  if (post.links?.videy?.length > 0) {
+    html += `<h4>Download via Videy</h4><ul>`;
+    post.links.videy.forEach((link, i) => {
+      html += `<li><a class="download-button" href="${decodeUrl(link)}" target="_blank">Videy ${i + 1}</a></li>`;
+    });
+    html += `</ul>`;
+  }
+
+  if (post.links?.terabox?.length > 0) {
+    html += `<h4>Download via Terabox</h4><ul>`;
+    post.links.terabox.forEach(link => {
+      html += `<li><a class="download-button" href="${decodeUrl(link)}" target="_blank">Full Konten</a></li>`;
+    });
+    html += `</ul>`;
+  }
+
+  content.innerHTML = html;
+  overlay.style.display = "flex";
+}
+
+function closeOverlay(event) {
+  if (
+    event.target.id === "overlay" ||
+    event.target.classList.contains("close-btn")
+  ) {
+    document.getElementById("overlay").style.display = "none";
+  }
 }
 
 function updatePagination() {
