@@ -1,6 +1,6 @@
 let posts = [];
 let currentPage = 1;
-const postsPerPage = 20;
+const postsPerPage = 30; // 3 kolom × 10 baris
 
 // Decode base64 untuk link download
 function decodeUrl(encodedUrl) {
