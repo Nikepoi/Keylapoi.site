@@ -1,178 +1,184 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Redirecting...</title>
-    <!-- Kode Iklan -->
-    <script src="https://fpyf8.com/88/tag.min.js" data-zone="132274" async data-cfasync="false"></script>
-    <style>
-        body {
-            background-color: #f0f0f0;
-            color: #333;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-        .download-container {
-            text-align: center;
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
-            width: 95%;
-            max-width: 100%;
-            margin: 20px auto;
-            border: 1px solid #000000;
-        }
-        @media (min-width: 1024px) {
-            .download-container {
-                width: 80%;
-                max-width: 1200px;
-            }
-        }
-        .download-button {
-            display: block;
-            width: 100%;
-            padding: 14px 0;
-            font-size: 16px;
-            font-weight: bold;
-            color: #ffffff;
-            text-decoration: none;
-            background-color: #5b3b84;
-            border: 1px solid #5b3b84;
-            border-radius: 5px;
-            margin: 10px 0;
-            transition: background-color 0.2s ease, color 0.2s ease;
-        }
-        .download-button:hover {
-            background-color: #462a66;
-            color: #ffffff;
-        }
-        .download-button:disabled {
-            background-color: #cccccc;
-            border-color: #cccccc;
-            cursor: not-allowed;
-            color: #666666;
-        }
-        .image-container {
-            text-align: center;
-            margin-bottom: 15px;
-        }
-        .image-container img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 10px;
-        }
-        .notice {
-            font-size: 18px;
-            margin-bottom: 20px;
-            color: #5b3b84;
-        }
-        .noscript-message {
-            font-size: 16px;
-            color: #d9534f;
-            margin-bottom: 20px;
-        }
-        .popup-instruction {
-            font-size: 14px;
-            color: #462a66;
-            margin-bottom: 15px;
-            font-weight: bold;
-        }
-        .policy-section, .copyright-section {
-            text-align: left;
-            font-size: 12px;
-            color: #555;
-            margin-top: 20px;
-            padding: 10px;
-            border-top: 1px solid #ddd;
-        }
-        .policy-section h4, .copyright-section h4 {
-            font-size: 14px;
-            color: #333;
-            margin-bottom: 10px;
-        }
-        .policy-section p, .copyright-section p {
-            margin: 5px 0;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Redirecting...</title>
+
+  <!-- Kode Iklan -->
+  <script src="https://fpyf8.com/88/tag.min.js" data-zone="132274" async data-cfasync="false"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      color: #333;
+      line-height: 1.5;
+    }
+
+    .download-container {
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #000;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      margin: 30px auto;
+      width: 95%;
+      max-width: 600px;
+    }
+
+    .notice {
+      font-size: 18px;
+      font-weight: bold;
+      color: #5b3b84;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .popup-instruction {
+      font-size: 14px;
+      color: #462a66;
+      font-weight: bold;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .download-button {
+      display: block;
+      width: 100%;
+      padding: 14px 0;
+      font-size: 16px;
+      font-weight: bold;
+      color: #fff;
+      background-color: #5b3b84;
+      border: 1px solid #5b3b84;
+      border-radius: 5px;
+      text-align: center;
+      text-decoration: none;
+      transition: background-color 0.2s ease;
+    }
+
+    .download-button:hover {
+      background-color: #462a66;
+    }
+
+    .download-button:disabled {
+      background-color: #ccc;
+      border-color: #ccc;
+      color: #666;
+      cursor: not-allowed;
+    }
+
+    .noscript-message {
+      font-size: 16px;
+      color: #d9534f;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .policy-section,
+    .copyright-section {
+      margin-top: 30px;
+      font-size: 13px;
+      color: #555;
+    }
+
+    .policy-section h4,
+    .copyright-section h4 {
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 5px;
+    }
+
+    .policy-section p,
+    .copyright-section p {
+      margin: 5px 0;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 768px) {
+      .download-container {
+        margin: 20px 10px;
+        width: 95%;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="download-container">
-        <noscript>
-            <p class="noscript-message">JavaScript dinonaktifkan. Silakan aktifkan JavaScript untuk melanjutkan ke konten, atau hubungi kami untuk link alternatif.</p>
-        </noscript>
-        <p id="noticeMessage" class="notice">Link valid, klik OK di bawah untuk melanjutkan</p>
-        <p class="popup-instruction">Catatan: Untuk melanjutkan ke konten, pastikan pop-up diizinkan di browser Anda. Jika tombol "OK" tidak membuka tab baru, klik ikon gembok atau info di bilah alamat, lalu izinkan pop-up untuk situs ini. Terima kasih!</p>
-        <a id="redirectButton" class="download-button" style="display: none;" href="#" onclick="showPopup()">OK</a>
-        <div class="policy-section">
-            <h4>Kebijakan Penggunaan Halaman Savelink</h4>
-            <p>Selamat datang di halaman savelink KeylaPoi! Halaman ini dirancang untuk memberikan akses aman dan mudah ke konten eksternal seperti video atau file yang dihosting di platform terpercaya (misalnya, Videy atau Terabox). Kami memproses link secara otomatis untuk memastikan keamanan dan kenyamanan Anda.</p>
-            <p><strong>Penggunaan:</strong> Klik tombol "OK" untuk melanjutkan ke konten. Pastikan pop-up diizinkan di browser Anda untuk pengalaman terbaik.</p>
-            <p><strong>Privasi:</strong> Kami tidak menyimpan data pribadi atau melacak aktivitas Anda di halaman ini. Link diproses hanya untuk tujuan redirect.</p>
-            <p><strong>Disclaimer:</strong> Konten eksternal di luar kendali kami. Pastikan Anda mematuhi ketentuan layanan platform tujuan. Jika ada masalah, hubungi kami melalui <a href="mailto:kontak@keylapoi.site">kontak@keylapoi.site</a>.</p>
-            <p>Terima kasih telah menggunakan layanan kami!</p>
-        </div>
-        <div class="copyright-section">
-            <h4>Hak Cipta</h4>
-            <p>© 2025 KeylaPoi. Semua hak cipta dilindungi. Konten, desain, dan kode pada halaman ini adalah milik KeylaPoi dan tidak boleh disalin, didistribusikan, atau digunakan tanpa izin tertulis dari pemilik. Pelanggaran akan ditindak sesuai hukum yang berlaku.</p>
-        </div>
+  <div class="download-container">
+    <noscript>
+      <p class="noscript-message">JavaScript dinonaktifkan. Aktifkan untuk melanjutkan ke konten.</p>
+    </noscript>
+
+    <p id="noticeMessage" class="notice">Link valid, klik OK untuk melanjutkan</p>
+    <p class="popup-instruction">Pastikan pop-up diizinkan di browser kamu ya!</p>
+
+    <a id="redirectButton" class="download-button" style="display: none;" href="#" onclick="showPopup()">OK</a>
+
+    <div class="policy-section">
+      <h4>Kebijakan Penggunaan Halaman Savelink</h4>
+      <p>Halaman ini bertujuan mengarahkan kamu ke konten eksternal seperti Videy dan Terabox. Link diolah otomatis untuk kenyamanan pengguna.</p>
+      <p><strong>Privasi:</strong> Tidak ada data pribadi yang dikumpulkan.</p>
+      <p><strong>Disclaimer:</strong> Kami tidak bertanggung jawab atas konten di situs tujuan.</p>
     </div>
-    <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const encodedUrl = urlParams.get('url');
-        let decodedUrl = '';
-        const redirectButton = document.getElementById('redirectButton');
 
-        if (encodedUrl) {
-            try {
-                decodedUrl = atob(encodedUrl);
-                redirectButton.style.display = 'block';
-                redirectButton.disabled = true; // Disable button initially
-                startCountdown();
-            } catch (e) {
-                document.getElementById('noticeMessage').textContent = 'Link tidak valid!';
-                document.getElementById('noticeMessage').style.color = '#d9534f';
-                document.querySelector('.popup-instruction').style.display = 'none';
-            }
-        } else {
-            document.getElementById('noticeMessage').textContent = 'Link tidak ditemukan!';
-            document.getElementById('noticeMessage').style.color = '#d9534f';
-            document.querySelector('.popup-instruction').style.display = 'none';
+    <div class="copyright-section">
+      <h4>Hak Cipta</h4>
+      <p>© 2025 KeylaPoi. Dilarang menyalin tanpa izin.</p>
+    </div>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const encodedUrl = urlParams.get('url');
+    let decodedUrl = '';
+    const redirectButton = document.getElementById('redirectButton');
+
+    if (encodedUrl) {
+      try {
+        decodedUrl = atob(encodedUrl);
+        redirectButton.style.display = 'block';
+        redirectButton.disabled = true;
+        startCountdown();
+      } catch (e) {
+        document.getElementById('noticeMessage').textContent = 'Link tidak valid!';
+        document.getElementById('noticeMessage').style.color = '#d9534f';
+        document.querySelector('.popup-instruction').style.display = 'none';
+      }
+    } else {
+      document.getElementById('noticeMessage').textContent = 'Link tidak ditemukan!';
+      document.getElementById('noticeMessage').style.color = '#d9534f';
+      document.querySelector('.popup-instruction').style.display = 'none';
+    }
+
+    function startCountdown() {
+      let seconds = 6;
+      redirectButton.textContent = `Tunggu ${seconds} detik...`;
+
+      const countdown = setInterval(() => {
+        seconds--;
+        redirectButton.textContent = `Tunggu ${seconds} detik...`;
+        if (seconds <= 0) {
+          clearInterval(countdown);
+          redirectButton.disabled = false;
+          redirectButton.textContent = 'OK';
         }
+      }, 1000);
+    }
 
-        function startCountdown() {
-            let seconds = 6;
-            redirectButton.textContent = `Tunggu ${seconds} detik...`;
-
-            const countdown = setInterval(() => {
-                seconds--;
-                redirectButton.textContent = `Tunggu ${seconds} detik...`;
-                if (seconds <= 0) {
-                    clearInterval(countdown);
-                    redirectButton.disabled = false;
-                    redirectButton.textContent = 'OK';
-                }
-            }, 1000);
-        }
-
-        function showPopup() {
-            if (redirectButton.disabled) return; // Prevent clicks during countdown
-            alert('Link akan dibuka di tab baru!');
-            if (decodedUrl) {
-                window.open(decodedUrl, '_blank'); // Open in new tab
-            }
-            // Disable button after click to prevent multiple redirects
-            redirectButton.disabled = true;
-            redirectButton.textContent = 'Memproses...';
-        }
-
-        // Keep ad script alive by ensuring page stays active
-        window.addEventListener('beforeunload', (event) => {
-            // Avoid interrupting ad loading by not prompting on unload
-            // Ad script should continue running as page remains open
-        });
-    </script>
+    function showPopup() {
+      if (redirectButton.disabled) return;
+      alert('Link akan dibuka di tab baru!');
+      if (decodedUrl) window.open(decodedUrl, '_blank');
+      redirectButton.disabled = true;
+      redirectButton.textContent = 'Memproses...';
+    }
+  </script>
 </body>
-  </html>
+</html>
