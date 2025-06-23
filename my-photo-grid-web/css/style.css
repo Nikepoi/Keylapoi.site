@@ -9,6 +9,12 @@ body {
   background-color: #f0f0f0;
   color: #333;
   line-height: 1.5;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body.dark-mode {
+  background-color: #121212;
+  color: #ddd;
 }
 
 /* Navbar */
@@ -22,6 +28,11 @@ body {
   position: sticky;
   top: 0;
   z-index: 1000;
+}
+
+body.dark-mode .navbar {
+  background-color: #1e1e1e;
+  border-color: #444;
 }
 
 .logo {
@@ -38,6 +49,10 @@ body {
   padding: 0.5rem;
 }
 
+body.dark-mode .hamburger {
+  color: #ddd;
+}
+
 .nav-menu {
   display: none;
   position: fixed;
@@ -49,6 +64,11 @@ body {
   list-style: none;
   padding-top: 4rem;
   box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+}
+
+body.dark-mode .nav-menu {
+  background-color: #1e1e1e;
+  box-shadow: -2px 0 5px rgba(255,255,255,0.05);
 }
 
 .nav-menu.active {
@@ -63,6 +83,10 @@ body {
   color: #333;
   text-decoration: none;
   font-size: 1.1rem;
+}
+
+body.dark-mode .nav-menu li a {
+  color: #ccc;
 }
 
 .nav-menu li a:hover {
@@ -87,6 +111,12 @@ body {
   border: 1px solid #000000;
   transition: transform 0.2s;
   cursor: pointer;
+}
+
+body.dark-mode .grid-item {
+  background-color: #1e1e1e;
+  border: 1px solid #555;
+  box-shadow: 0 2px 8px rgba(255,255,255,0.05);
 }
 
 .grid-item:hover {
@@ -120,6 +150,47 @@ body {
   background-color: #462a66;
 }
 
+/* Toolbar */
+.toolbar {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+}
+
+.toolbar input {
+  padding: 0.5rem;
+  font-size: 1rem;
+  width: 200px;
+}
+
+.toolbar button {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 5px;
+  background-color: #5b3b84;
+  color: white;
+  border: none;
+}
+
+body.dark-mode .toolbar button {
+  background-color: #3a2c5b;
+}
+
+/* Loading */
+.loading {
+  text-align: center;
+  display: none;
+  font-size: 1.2rem;
+  padding: 1rem;
+  color: #5b3b84;
+}
+
+body.dark-mode .loading {
+  color: #c6b3ff;
+}
+
 /* Overlay */
 .overlay {
   position: fixed;
@@ -143,6 +214,11 @@ body {
   max-height: 90vh;
 }
 
+body.dark-mode .overlay-content {
+  background-color: #2b2b2b;
+  color: #ddd;
+}
+
 .overlay-content img {
   width: 100%;
   height: auto;
@@ -159,6 +235,10 @@ body {
   margin-top: 1rem;
   font-size: 1.1rem;
   color: #333;
+}
+
+body.dark-mode .overlay-content h4 {
+  color: #ccc;
 }
 
 .overlay-content ul {
@@ -207,4 +287,14 @@ body {
   .grid-container {
     grid-template-columns: 1fr;
   }
-    }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .toolbar input {
+    width: 100%;
+    max-width: 300px;
+  }
+}
