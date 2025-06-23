@@ -2,7 +2,6 @@ let posts = [];
 let currentPage = 1;
 const postsPerPage = 20;
 let filteredPosts = [];
-let darkMode = false;
 
 function decodeUrl(encodedUrl) {
   try {
@@ -22,7 +21,6 @@ async function loadPosts(genre = 'all') {
   posts = [];
   filteredPosts = [];
   const loadedIds = new Set();
-  showLoading(true);
 
   try {
     const indexRes = await fetch('data/index.json');
@@ -47,10 +45,9 @@ async function loadPosts(genre = 'all') {
     currentPage = 1;
     displayPosts(getCurrentPagePosts());
     updatePagination();
+    console.log("Total post valid yang dimuat:", filteredPosts.length);
   } catch (err) {
     console.error("Gagal load post:", err);
-  } finally {
-    showLoading(false);
   }
 }
 
@@ -133,8 +130,12 @@ function closeOverlay(event) {
 function updatePagination() {
   const prevBtn = document.getElementById('prevBtn');
   const nextBtn = document.getElementById('nextBtn');
+
+  const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
   prevBtn.style.display = currentPage > 1 ? 'inline-block' : 'none';
-  nextBtn.style.display = currentPage < Math.ceil(filteredPosts.length / postsPerPage) ? 'inline-block' : 'none';
+  nextBtn.style.display = currentPage < totalPages ? 'inline-block' : 'none';
+
+  console.log("Halaman sekarang:", currentPage, "dari", totalPages);
 }
 
 function prevPage() {
@@ -147,7 +148,8 @@ function prevPage() {
 }
 
 function nextPage() {
-  if (currentPage < Math.ceil(filteredPosts.length / postsPerPage)) {
+  const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+  if (currentPage < totalPages) {
     currentPage++;
     displayPosts(getCurrentPagePosts());
     updatePagination();
@@ -173,26 +175,6 @@ function outsideClickListener(event) {
     menu.classList.remove('active');
     document.removeEventListener('click', outsideClickListener);
   }
-}
-
-function searchPosts() {
-  const searchValue = document.getElementById('searchInput').value.toLowerCase();
-  currentPage = 1;
-  filteredPosts = posts.filter(post => post.title.toLowerCase().includes(searchValue));
-  displayPosts(getCurrentPagePosts());
-  updatePagination();
-}
-
-function toggleDarkMode() {
-  document.body.classList.toggle('dark-mode');
-  darkMode = !darkMode;
-  const darkBtn = document.getElementById('darkModeBtn');
-  darkBtn.textContent = darkMode ? '☀️' : '🌙';
-}
-
-function showLoading(show) {
-  const loadingElement = document.getElementById('loading');
-  loadingElement.style.display = show ? 'block' : 'none';
 }
 
 function scrollToTop() {
