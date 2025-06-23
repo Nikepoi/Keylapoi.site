@@ -1,7 +1,7 @@
 let posts = [];
+let filteredPosts = [];
 let currentPage = 1;
 const postsPerPage = 20;
-let filteredPosts = [];
 
 function decodeUrl(encodedUrl) {
   try {
@@ -9,6 +9,7 @@ function decodeUrl(encodedUrl) {
     const url = new URL(decoded);
     const hostname = url.hostname;
     const targetDomains = ['videy.co', 'mediafire', 'terabox', 'pixeldrain'];
+
     const isTarget = targetDomains.some(domain => hostname.includes(domain));
     return isTarget ? `https://www.keylapoi.site/safelink.html?url=${encodedUrl}` : decoded;
   } catch (e) {
@@ -19,7 +20,6 @@ function decodeUrl(encodedUrl) {
 
 async function loadPosts(genre = 'all') {
   posts = [];
-  filteredPosts = [];
   const loadedIds = new Set();
 
   try {
@@ -31,30 +31,33 @@ async function loadPosts(genre = 'all') {
       const res = await fetch(filePath);
       if (res.ok) {
         const post = await res.json();
-        if (genre === 'all' || post.genre === genre) {
-          if (!loadedIds.has(post.id)) {
-            loadedIds.add(post.id);
-            posts.push(post);
-          }
+        if (!loadedIds.has(post.id)) {
+          loadedIds.add(post.id);
+          posts.push(post);
         }
       }
     }
 
     posts.sort((a, b) => new Date(b.date) - new Date(a.date));
-    filteredPosts = [...posts];
+
+    if (genre === 'all') {
+      filteredPosts = posts;
+    } else {
+      filteredPosts = posts.filter(post => post.genre === genre);
+    }
+
     currentPage = 1;
     displayPosts(getCurrentPagePosts());
     updatePagination();
-    console.log("Total post valid yang dimuat:", filteredPosts.length);
   } catch (err) {
     console.error("Gagal load post:", err);
   }
 }
 
 function getCurrentPagePosts() {
-  const startIndex = (currentPage - 1) * postsPerPage;
-  const endIndex = startIndex + postsPerPage;
-  return filteredPosts.slice(startIndex, endIndex);
+  const start = (currentPage - 1) * postsPerPage;
+  const end = start + postsPerPage;
+  return filteredPosts.slice(start, end);
 }
 
 function displayPosts(postsToShow) {
@@ -103,7 +106,7 @@ function showOverlay(post) {
 
   if (post.links?.mediafire?.length > 0) {
     html += `<h4>Download via Mediafire</h4><ul>`;
-    post.links.mediafire.forEach(link => {
+    post.links.mediafire.forEach((link, i) => {
       html += `<li><a class="download-button" href="${decodeUrl(link)}" target="_blank">Full Konten</a></li>`;
     });
     html += `</ul>`;
@@ -122,29 +125,18 @@ function showOverlay(post) {
 }
 
 function closeOverlay(event) {
-  if (event.target.id === "overlay" || event.target.classList.contains("close-btn")) {
+  if (
+    event.target.id === "overlay" ||
+    event.target.classList.contains("close-btn")
+  ) {
     document.getElementById("overlay").style.display = "none";
   }
 }
 
 function updatePagination() {
-  const prevBtn = document.getElementById('prevBtn');
-  const nextBtn = document.getElementById('nextBtn');
-
   const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
-  prevBtn.style.display = currentPage > 1 ? 'inline-block' : 'none';
-  nextBtn.style.display = currentPage < totalPages ? 'inline-block' : 'none';
-
-  console.log("Halaman sekarang:", currentPage, "dari", totalPages);
-}
-
-function prevPage() {
-  if (currentPage > 1) {
-    currentPage--;
-    displayPosts(getCurrentPagePosts());
-    updatePagination();
-    scrollToTop();
-  }
+  document.getElementById('prevBtn').style.display = currentPage > 1 ? 'inline-block' : 'none';
+  document.getElementById('nextBtn').style.display = currentPage < totalPages ? 'inline-block' : 'none';
 }
 
 function nextPage() {
@@ -157,8 +149,20 @@ function nextPage() {
   }
 }
 
+function prevPage() {
+  if (currentPage > 1) {
+    currentPage--;
+    displayPosts(getCurrentPagePosts());
+    updatePagination();
+    scrollToTop();
+  }
+}
+
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 function filterPosts(genre) {
-  currentPage = 1;
   loadPosts(genre);
 }
 
@@ -177,16 +181,4 @@ function outsideClickListener(event) {
   }
 }
 
-function scrollToTop() {
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth'
-  });
-}
-
 window.addEventListener('load', () => loadPosts('all'));
-window.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    document.getElementById('overlay').style.display = 'none';
-  }
-});
