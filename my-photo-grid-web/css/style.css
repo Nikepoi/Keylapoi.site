@@ -27,7 +27,7 @@ body.dark-mode {
   border-bottom: 2px solid #000;
   position: sticky;
   top: 0;
-  z-index: 1000;
+  z-index: 1001; /* Di atas menu dan grid */
 }
 
 body.dark-mode .navbar {
@@ -47,6 +47,7 @@ body.dark-mode .navbar {
   font-size: 1.5rem;
   cursor: pointer;
   padding: 0.5rem;
+  z-index: 1002; /* Di atas semua */
 }
 
 body.dark-mode .hamburger {
@@ -59,20 +60,23 @@ body.dark-mode .hamburger {
   top: 0;
   right: 0;
   height: 100%;
-  width: 250px;
-  background-color: #ffffff;
+  width: 200px; /* Lebar tetap 200px */
+  background: linear-gradient(135deg, #2c2c2c, #4a4a4a); /* Gradient abu-abu */
   list-style: none;
   padding-top: 4rem;
-  box-shadow: -2px 0 5px rgba(0,0,0,0.1);
-}
-
-body.dark-mode .nav-menu {
-  background-color: #1e1e1e;
-  box-shadow: -2px 0 5px rgba(255,255,255,0.05);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Box shadow netral */
+  transition: transform 0.3s ease; /* Animasi smooth */
+  transform: translateX(100%); /* Sembunyi default */
 }
 
 .nav-menu.active {
   display: block;
+  transform: translateX(0); /* Muncul pas active */
+}
+
+body.dark-mode .nav-menu {
+  background: linear-gradient(135deg, #1a1a1a, #333333); /* Dark mode abu-abu */
+  box-shadow: 0 2px 5px rgba(255,255,255,0.05); /* Shadow dark mode */
 }
 
 .nav-menu li {
@@ -80,17 +84,20 @@ body.dark-mode .nav-menu {
 }
 
 .nav-menu li a {
-  color: #333;
+  color: #fff;
   text-decoration: none;
   font-size: 1.1rem;
+  font-weight: bold;
+  display: block;
+  transition: color 0.3s ease;
 }
 
 body.dark-mode .nav-menu li a {
-  color: #ccc;
+  color: #e0e0e0;
 }
 
 .nav-menu li a:hover {
-  color: #5b3b84;
+  color: #ffd700; /* Hover emas */
 }
 
 /* Grid Post Container */
@@ -101,6 +108,7 @@ body.dark-mode .nav-menu li a {
   padding: 1rem;
   max-width: 1200px;
   margin: 0 auto;
+  z-index: 1; /* Di bawah menu */
 }
 
 .grid-item {
@@ -111,7 +119,7 @@ body.dark-mode .nav-menu li a {
   border: 1px solid #000000;
   transition: transform 0.2s;
   cursor: pointer;
-  width: 100%; /* Pastikan lebar penuh */
+  width: 100%;
 }
 
 body.dark-mode .grid-item {
@@ -127,16 +135,17 @@ body.dark-mode .grid-item {
 .grid-item img {
   width: 100%;
   height: auto;
-  max-height: 300px; /* Batasi tinggi gambar biar gak kegedean */
+  max-height: 300px; /* Batasi tinggi gambar */
   border-radius: 8px;
-  display: block; /* Hapus space di bawah gambar */
-  object-fit: cover; /* Pastikan gambar gak stretch */
+  display: block;
+  object-fit: cover;
 }
 
 /* Pagination */
 .pagination {
   text-align: center;
   padding: 1rem;
+  z-index: 1;
 }
 
 .pagination button {
@@ -144,14 +153,14 @@ body.dark-mode .grid-item {
   font-size: 1rem;
   cursor: pointer;
   margin: 0 0.5rem;
-  background-color: #5b3b84;
+  background-color: #4a4a4a; /* Ganti dari #5b3b84 ke abu-abu */
   color: #fff;
   border: none;
   border-radius: 5px;
 }
 
 .pagination button:hover {
-  background-color: #462a66;
+  background-color: #333333; /* Hover abu-abu gelap */
 }
 
 /* Toolbar */
@@ -160,6 +169,7 @@ body.dark-mode .grid-item {
   justify-content: center;
   gap: 0.5rem;
   padding: 1rem;
+  z-index: 1;
 }
 
 .toolbar input {
@@ -173,13 +183,13 @@ body.dark-mode .grid-item {
   font-size: 1rem;
   cursor: pointer;
   border-radius: 5px;
-  background-color: #5b3b84;
+  background-color: #4a4a4a; /* Ganti dari #5b3b84 */
   color: white;
   border: none;
 }
 
 body.dark-mode .toolbar button {
-  background-color: #3a2c5b;
+  background-color: #333333; /* Dark mode abu-abu */
 }
 
 /* Loading */
@@ -188,11 +198,12 @@ body.dark-mode .toolbar button {
   display: none;
   font-size: 1.2rem;
   padding: 1rem;
-  color: #5b3b84;
+  color: #4a4a4a; /* Ganti dari #5b3b84 */
+  z-index: 1;
 }
 
 body.dark-mode .loading {
-  color: #c6b3ff;
+  color: #666666; /* Dark mode netral */
 }
 
 /* Loader */
@@ -283,26 +294,26 @@ body.dark-mode .overlay-content h4 {
   display: block;
   margin: 0.3rem 0;
   padding: 14px 0;
-  background-color: #5b3b84;
+  background-color: #4a4a4a; /* Ganti dari #5b3b84 */
   color: #fff;
   text-decoration: none;
   border-radius: 5px;
   font-weight: bold;
   font-size: 16px;
-  border: 1px solid #5b3b84;
+  border: 1px solid #4a4a4a;
   text-align: center;
   transition: background-color 0.2s ease;
 }
 
 .overlay-content .download-button:hover {
-  background-color: #462a66;
+  background-color: #333333; /* Hover abu-abu gelap */
 }
 
 .close-btn {
   position: absolute;
   top: 15px;
   right: 20px;
-  background-color: #5b3b84;
+  background-color: #4a4a4a; /* Ganti dari #5b3b84 */
   color: #fff;
   border: none;
   padding: 0.6rem 1.2rem;
@@ -312,11 +323,11 @@ body.dark-mode .overlay-content h4 {
 }
 
 .close-btn:hover {
-  background-color: #462a66;
+  background-color: #333333; /* Hover abu-abu gelap */
 }
 
 /* Responsif */
-@media screen and (max-width: 480px) { /* Diperkecil dari 600px ke 480px */
+@media screen and (max-width: 480px) {
   .grid-container {
     grid-template-columns: 1fr; /* 1 kolom di mobile */
   }
