@@ -44,13 +44,20 @@ async function loadPosts(genre = 'all') {
 
     posts.sort((a, b) => new Date(b.date) - new Date(a.date));
     filteredPosts = [...posts];
-    displayPosts(filteredPosts.slice(0, postsPerPage));
+    currentPage = 1;
+    displayPosts(getCurrentPagePosts());
     updatePagination();
   } catch (err) {
     console.error("Gagal load post:", err);
   } finally {
     showLoading(false);
   }
+}
+
+function getCurrentPagePosts() {
+  const startIndex = (currentPage - 1) * postsPerPage;
+  const endIndex = startIndex + postsPerPage;
+  return filteredPosts.slice(startIndex, endIndex);
 }
 
 function displayPosts(postsToShow) {
@@ -124,27 +131,27 @@ function closeOverlay(event) {
 }
 
 function updatePagination() {
-  document.getElementById('prevBtn').style.display = currentPage > 1 ? 'inline-block' : 'none';
-  document.getElementById('nextBtn').style.display = filteredPosts.length > currentPage * postsPerPage ? 'inline-block' : 'none';
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  prevBtn.style.display = currentPage > 1 ? 'inline-block' : 'none';
+  nextBtn.style.display = currentPage < Math.ceil(filteredPosts.length / postsPerPage) ? 'inline-block' : 'none';
 }
 
 function prevPage() {
   if (currentPage > 1) {
     currentPage--;
-    const start = (currentPage - 1) * postsPerPage;
-    const end = start + postsPerPage;
-    displayPosts(filteredPosts.slice(start, end));
+    displayPosts(getCurrentPagePosts());
     updatePagination();
+    scrollToTop();
   }
 }
 
 function nextPage() {
-  const start = currentPage * postsPerPage;
-  const end = start + postsPerPage;
-  if (start < filteredPosts.length) {
+  if (currentPage < Math.ceil(filteredPosts.length / postsPerPage)) {
     currentPage++;
-    displayPosts(filteredPosts.slice(start, end));
+    displayPosts(getCurrentPagePosts());
     updatePagination();
+    scrollToTop();
   }
 }
 
@@ -172,7 +179,7 @@ function searchPosts() {
   const searchValue = document.getElementById('searchInput').value.toLowerCase();
   currentPage = 1;
   filteredPosts = posts.filter(post => post.title.toLowerCase().includes(searchValue));
-  displayPosts(filteredPosts.slice(0, postsPerPage));
+  displayPosts(getCurrentPagePosts());
   updatePagination();
 }
 
@@ -186,6 +193,13 @@ function toggleDarkMode() {
 function showLoading(show) {
   const loadingElement = document.getElementById('loading');
   loadingElement.style.display = show ? 'block' : 'none';
+}
+
+function scrollToTop() {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
 }
 
 window.addEventListener('load', () => loadPosts('all'));
