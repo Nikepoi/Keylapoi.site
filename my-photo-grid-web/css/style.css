@@ -127,8 +127,10 @@ body.dark-mode .grid-item {
 .grid-item img {
   width: 100%;
   height: auto;
+  max-height: 300px; /* Batasi tinggi gambar biar gak kegedean */
   border-radius: 8px;
   display: block; /* Hapus space di bawah gambar */
+  object-fit: cover; /* Pastikan gambar gak stretch */
 }
 
 /* Pagination */
@@ -314,7 +316,7 @@ body.dark-mode .overlay-content h4 {
 }
 
 /* Responsif */
-@media screen and (max-width: 600px) { /* Diperkecil dari 768px ke 600px */
+@media screen and (max-width: 480px) { /* Diperkecil dari 600px ke 480px */
   .grid-container {
     grid-template-columns: 1fr; /* 1 kolom di mobile */
   }
