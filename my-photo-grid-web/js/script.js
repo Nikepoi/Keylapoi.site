@@ -1,6 +1,8 @@
 let posts = [];
 let currentPage = 1;
 const postsPerPage = 20;
+let filteredPosts = [];
+let darkMode = false;
 
 function decodeUrl(encodedUrl) {
   try {
@@ -8,7 +10,6 @@ function decodeUrl(encodedUrl) {
     const url = new URL(decoded);
     const hostname = url.hostname;
     const targetDomains = ['videy.co', 'mediafire', 'terabox', 'pixeldrain'];
-
     const isTarget = targetDomains.some(domain => hostname.includes(domain));
     return isTarget ? `https://www.keylapoi.site/safelink.html?url=${encodedUrl}` : decoded;
   } catch (e) {
@@ -19,7 +20,9 @@ function decodeUrl(encodedUrl) {
 
 async function loadPosts(genre = 'all') {
   posts = [];
+  filteredPosts = [];
   const loadedIds = new Set();
+  showLoading(true);
 
   try {
     const indexRes = await fetch('data/index.json');
@@ -40,10 +43,13 @@ async function loadPosts(genre = 'all') {
     }
 
     posts.sort((a, b) => new Date(b.date) - new Date(a.date));
-    displayPosts(posts.slice(0, postsPerPage));
+    filteredPosts = [...posts];
+    displayPosts(filteredPosts.slice(0, postsPerPage));
     updatePagination();
   } catch (err) {
     console.error("Gagal load post:", err);
+  } finally {
+    showLoading(false);
   }
 }
 
@@ -93,7 +99,7 @@ function showOverlay(post) {
 
   if (post.links?.mediafire?.length > 0) {
     html += `<h4>Download via Mediafire</h4><ul>`;
-    post.links.mediafire.forEach((link, i) => {
+    post.links.mediafire.forEach(link => {
       html += `<li><a class="download-button" href="${decodeUrl(link)}" target="_blank">Full Konten</a></li>`;
     });
     html += `</ul>`;
@@ -112,17 +118,14 @@ function showOverlay(post) {
 }
 
 function closeOverlay(event) {
-  if (
-    event.target.id === "overlay" ||
-    event.target.classList.contains("close-btn")
-  ) {
+  if (event.target.id === "overlay" || event.target.classList.contains("close-btn")) {
     document.getElementById("overlay").style.display = "none";
   }
 }
 
 function updatePagination() {
   document.getElementById('prevBtn').style.display = currentPage > 1 ? 'inline-block' : 'none';
-  document.getElementById('nextBtn').style.display = posts.length > currentPage * postsPerPage ? 'inline-block' : 'none';
+  document.getElementById('nextBtn').style.display = filteredPosts.length > currentPage * postsPerPage ? 'inline-block' : 'none';
 }
 
 function prevPage() {
@@ -130,7 +133,7 @@ function prevPage() {
     currentPage--;
     const start = (currentPage - 1) * postsPerPage;
     const end = start + postsPerPage;
-    displayPosts(posts.slice(start, end));
+    displayPosts(filteredPosts.slice(start, end));
     updatePagination();
   }
 }
@@ -138,9 +141,9 @@ function prevPage() {
 function nextPage() {
   const start = currentPage * postsPerPage;
   const end = start + postsPerPage;
-  if (start < posts.length) {
+  if (start < filteredPosts.length) {
     currentPage++;
-    displayPosts(posts.slice(start, end));
+    displayPosts(filteredPosts.slice(start, end));
     updatePagination();
   }
 }
@@ -165,4 +168,29 @@ function outsideClickListener(event) {
   }
 }
 
+function searchPosts() {
+  const searchValue = document.getElementById('searchInput').value.toLowerCase();
+  currentPage = 1;
+  filteredPosts = posts.filter(post => post.title.toLowerCase().includes(searchValue));
+  displayPosts(filteredPosts.slice(0, postsPerPage));
+  updatePagination();
+}
+
+function toggleDarkMode() {
+  document.body.classList.toggle('dark-mode');
+  darkMode = !darkMode;
+  const darkBtn = document.getElementById('darkModeBtn');
+  darkBtn.textContent = darkMode ? '☀️' : '🌙';
+}
+
+function showLoading(show) {
+  const loadingElement = document.getElementById('loading');
+  loadingElement.style.display = show ? 'block' : 'none';
+}
+
 window.addEventListener('load', () => loadPosts('all'));
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.getElementById('overlay').style.display = 'none';
+  }
+});
