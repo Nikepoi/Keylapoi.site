@@ -9,7 +9,6 @@ function decodeUrl(encodedUrl) {
     const url = new URL(decoded);
     const hostname = url.hostname;
     const targetDomains = ['videy.co', 'mediafire', 'terabox', 'pixeldrain'];
-
     const isTarget = targetDomains.some(domain => hostname.includes(domain));
     return isTarget ? `https://www.keylapoi.site/safelink.html?url=${encodedUrl}` : decoded;
   } catch (e) {
@@ -18,9 +17,8 @@ function decodeUrl(encodedUrl) {
   }
 }
 
-async function loadPosts(genre = 'all') {
+async function loadAllPosts() {
   posts.length = 0;
-  filteredPosts.length = 0;
   currentPage = 1;
   const loadedIds = new Set();
 
@@ -40,8 +38,9 @@ async function loadPosts(genre = 'all') {
       }
     }
 
+    // Sort semua post berdasarkan tanggal terbaru
     posts.sort((a, b) => new Date(b.date) - new Date(a.date));
-    filteredPosts = (genre === 'all') ? posts : posts.filter(post => post.genre === genre);
+    filteredPosts = posts;
 
     displayPosts(getCurrentPagePosts());
     updatePagination();
@@ -121,10 +120,7 @@ function showOverlay(post) {
 }
 
 function closeOverlay(event) {
-  if (
-    event.target.id === "overlay" ||
-    event.target.classList.contains("close-btn")
-  ) {
+  if (event.target.id === "overlay" || event.target.classList.contains("close-btn")) {
     document.getElementById("overlay").style.display = "none";
   }
 }
@@ -159,7 +155,15 @@ function scrollToTop() {
 }
 
 function filterPosts(genre) {
-  loadPosts(genre);
+  currentPage = 1;
+  if (genre === 'all') {
+    filteredPosts = posts;
+  } else {
+    filteredPosts = posts.filter(post => post.genre && post.genre.toLowerCase() === genre.toLowerCase());
+  }
+  filteredPosts.sort((a, b) => new Date(b.date) - new Date(a.date)); // Pastikan selalu urutan terbaru
+  displayPosts(getCurrentPagePosts());
+  updatePagination();
 }
 
 function toggleMenu() {
@@ -177,4 +181,4 @@ function outsideClickListener(event) {
   }
 }
 
-window.addEventListener('load', () => loadPosts('all'));
+window.addEventListener('load', () => loadAllPosts());
