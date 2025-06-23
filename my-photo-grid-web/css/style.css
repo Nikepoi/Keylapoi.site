@@ -206,6 +206,20 @@ body.dark-mode .loading {
   transition: opacity 0.3s ease;
 }
 
+.loading-dots {
+  display: inline-block;
+  font-family: monospace;
+  overflow: hidden;
+  white-space: nowrap;
+  animation: typing 1.5s steps(10) infinite;
+}
+
+@keyframes typing {
+  0% { width: 0; }
+  50% { width: 100%; }
+  100% { width: 0; }
+}
+
 /* Overlay */
 .overlay {
   position: fixed;
@@ -312,4 +326,4 @@ body.dark-mode .overlay-content h4 {
     width: 100%;
     max-width: 300px;
   }
-}
+  }
