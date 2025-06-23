@@ -96,7 +96,7 @@ body.dark-mode .nav-menu li a {
 /* Grid Post Container */
 .grid-container {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* Pastikan 2 kolom */
+  grid-template-columns: repeat(2, 1fr); /* 2 kolom default */
   gap: 1rem;
   padding: 1rem;
   max-width: 1200px;
@@ -314,7 +314,7 @@ body.dark-mode .overlay-content h4 {
 }
 
 /* Responsif */
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 600px) { /* Diperkecil dari 768px ke 600px */
   .grid-container {
     grid-template-columns: 1fr; /* 1 kolom di mobile */
   }
@@ -328,4 +328,4 @@ body.dark-mode .overlay-content h4 {
     width: 100%;
     max-width: 300px;
   }
-    }
+  }
