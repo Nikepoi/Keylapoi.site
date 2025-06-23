@@ -19,7 +19,9 @@ function decodeUrl(encodedUrl) {
 }
 
 async function loadPosts(genre = 'all') {
-  posts = [];
+  posts.length = 0;
+  filteredPosts.length = 0;
+  currentPage = 1;
   const loadedIds = new Set();
 
   try {
@@ -39,14 +41,8 @@ async function loadPosts(genre = 'all') {
     }
 
     posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+    filteredPosts = (genre === 'all') ? posts : posts.filter(post => post.genre === genre);
 
-    if (genre === 'all') {
-      filteredPosts = posts;
-    } else {
-      filteredPosts = posts.filter(post => post.genre === genre);
-    }
-
-    currentPage = 1;
     displayPosts(getCurrentPagePosts());
     updatePagination();
   } catch (err) {
