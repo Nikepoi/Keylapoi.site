@@ -96,7 +96,7 @@ body.dark-mode .nav-menu li a {
 /* Grid Post Container */
 .grid-container {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, 1fr); /* Pastikan 2 kolom */
   gap: 1rem;
   padding: 1rem;
   max-width: 1200px;
@@ -111,6 +111,7 @@ body.dark-mode .nav-menu li a {
   border: 1px solid #000000;
   transition: transform 0.2s;
   cursor: pointer;
+  width: 100%; /* Pastikan lebar penuh */
 }
 
 body.dark-mode .grid-item {
@@ -127,6 +128,7 @@ body.dark-mode .grid-item {
   width: 100%;
   height: auto;
   border-radius: 8px;
+  display: block; /* Hapus space di bawah gambar */
 }
 
 /* Pagination */
@@ -314,7 +316,7 @@ body.dark-mode .overlay-content h4 {
 /* Responsif */
 @media screen and (max-width: 768px) {
   .grid-container {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr; /* 1 kolom di mobile */
   }
 
   .toolbar {
@@ -326,4 +328,4 @@ body.dark-mode .overlay-content h4 {
     width: 100%;
     max-width: 300px;
   }
-  }
+    }
