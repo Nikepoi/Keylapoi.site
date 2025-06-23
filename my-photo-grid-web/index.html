@@ -10,7 +10,7 @@
 <body>
   <nav class="navbar">
     <div class="logo">KEYPOI</div>
-    <button class="hamburger" onclick="toggleMenu()">
+    <button class="hamburger" aria-label="Menu" onclick="toggleMenu()">
       <i class="fas fa-bars"></i>
     </button>
     <ul class="nav-menu" id="navMenu">
@@ -25,12 +25,19 @@
     </ul>
   </nav>
 
+  <div class="toolbar">
+    <input type="text" id="searchInput" placeholder="Cari konten..." onkeyup="searchPosts()" />
+    <button onclick="toggleDarkMode()" id="darkModeBtn">🌙</button>
+  </div>
+
   <main class="grid-container" id="postGrid"></main>
 
   <div class="pagination">
     <button id="prevBtn" onclick="prevPage()">Previous</button>
     <button id="nextBtn" onclick="nextPage()">Next</button>
   </div>
+
+  <div class="loading" id="loading">Memuat...</div>
 
   <!-- Overlay konten -->
   <div id="overlay" class="overlay" onclick="closeOverlay(event)">
