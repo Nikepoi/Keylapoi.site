@@ -17,7 +17,16 @@ function decodeUrl(encodedUrl) {
   }
 }
 
+function showLoader() {
+  document.getElementById('blur-loader').style.display = 'flex';
+}
+
+function hideLoader() {
+  document.getElementById('blur-loader').style.display = 'none';
+}
+
 async function loadAllPosts() {
+  showLoader();
   posts.length = 0;
   currentPage = 1;
   const loadedIds = new Set();
@@ -38,14 +47,14 @@ async function loadAllPosts() {
       }
     }
 
-    // Sort semua post berdasarkan tanggal terbaru
     posts.sort((a, b) => new Date(b.date) - new Date(a.date));
     filteredPosts = posts;
-
     displayPosts(getCurrentPagePosts());
     updatePagination();
   } catch (err) {
     console.error("Gagal load post:", err);
+  } finally {
+    hideLoader();
   }
 }
 
@@ -121,7 +130,7 @@ function showOverlay(post) {
 
 function closeOverlay(event) {
   if (event.target.id === "overlay" || event.target.classList.contains("close-btn")) {
-    document.getElementById("overlay").style.display = "none";
+    document.getElementById('overlay').style.display = "none";
   }
 }
 
@@ -131,39 +140,58 @@ function updatePagination() {
   document.getElementById('nextBtn').style.display = currentPage < totalPages ? 'inline-block' : 'none';
 }
 
-function nextPage() {
-  const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
-  if (currentPage < totalPages) {
-    currentPage++;
+function filterPosts(genre) {
+  showLoader();
+  setTimeout(() => {
+    currentPage = 1;
+    if (genre === 'all') {
+      filteredPosts = posts;
+    } else {
+      filteredPosts = posts.filter(post => post.genre && post.genre.toLowerCase() === genre.toLowerCase());
+    }
+    filteredPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
     displayPosts(getCurrentPagePosts());
     updatePagination();
+    hideLoader();
+
+    // Tutup menu otomatis
+    const menu = document.getElementById('navMenu');
+    menu.classList.remove('active');
+    document.removeEventListener('click', outsideClickListener);
+
     scrollToTop();
-  }
+  }, 300);
+}
+
+function nextPage() {
+  showLoader();
+  setTimeout(() => {
+    const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+    if (currentPage < totalPages) {
+      currentPage++;
+      displayPosts(getCurrentPagePosts());
+      updatePagination();
+      scrollToTop();
+    }
+    hideLoader();
+  }, 300);
 }
 
 function prevPage() {
-  if (currentPage > 1) {
-    currentPage--;
-    displayPosts(getCurrentPagePosts());
-    updatePagination();
-    scrollToTop();
-  }
+  showLoader();
+  setTimeout(() => {
+    if (currentPage > 1) {
+      currentPage--;
+      displayPosts(getCurrentPagePosts());
+      updatePagination();
+      scrollToTop();
+    }
+    hideLoader();
+  }, 300);
 }
 
 function scrollToTop() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function filterPosts(genre) {
-  currentPage = 1;
-  if (genre === 'all') {
-    filteredPosts = posts;
-  } else {
-    filteredPosts = posts.filter(post => post.genre && post.genre.toLowerCase() === genre.toLowerCase());
-  }
-  filteredPosts.sort((a, b) => new Date(b.date) - new Date(a.date)); // Pastikan selalu urutan terbaru
-  displayPosts(getCurrentPagePosts());
-  updatePagination();
 }
 
 function toggleMenu() {
