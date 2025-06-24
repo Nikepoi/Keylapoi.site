@@ -342,3 +342,18 @@ body.dark-mode .overlay-content h4 {
     max-width: 300px;
   }
   }
+/* Footer */
+.site-footer {
+  background-color: #ffffff;
+  color: #333333;
+  text-align: center;
+  padding: 1rem;
+  border-top: 2px solid #000;
+  margin-top: 2rem;
+}
+
+body.dark-mode .site-footer {
+  background-color: #1e1e1e;
+  color: #dddddd;
+  border-color: #444;
+  }
