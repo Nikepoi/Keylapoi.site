@@ -377,3 +377,9 @@ body.dark-mode .site-footer {
   color: #dddddd;
   border-color: #444;
   }
+.nav-menu li a.active-genre {
+  background-color: #ffd700; /* Kuning */
+  color: #000; /* Tulisan hitam */
+  border-radius: 5px;
+  padding: 0.5rem;
+    }
