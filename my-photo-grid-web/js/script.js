@@ -48,9 +48,8 @@ async function loadAllPosts() {
     }
 
     posts.sort((a, b) => new Date(b.date) - new Date(a.date));
-    filteredPosts = posts;
-    displayPosts(getCurrentPagePosts());
-    updatePagination();
+    let savedGenre = localStorage.getItem('selectedGenre') || 'all';
+    filterPosts(savedGenre, false);
   } catch (err) {
     console.error("Gagal load post:", err);
   } finally {
@@ -139,24 +138,38 @@ function updatePagination() {
   document.getElementById('nextBtn').style.display = currentPage < totalPages ? 'inline-block' : 'none';
 }
 
-function filterPosts(genre) {
+function setActiveMenu(genre) {
+  const menuLinks = document.querySelectorAll('.nav-menu li a');
+  menuLinks.forEach(link => {
+    link.classList.remove('active-genre');
+    if (link.getAttribute('onclick').includes(`'${genre}'`)) {
+      link.classList.add('active-genre');
+    }
+  });
+}
+
+function filterPosts(genre, save = true) {
   showLoader();
   setTimeout(() => {
     currentPage = 1;
+
     if (genre === 'all') {
       filteredPosts = posts;
     } else {
       filteredPosts = posts.filter(post => post.genre && post.genre.toLowerCase() === genre.toLowerCase());
     }
+
     filteredPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
     displayPosts(getCurrentPagePosts());
     updatePagination();
     hideLoader();
 
-    const menu = document.getElementById('navMenu');
-    menu.classList.remove('active');
-    document.removeEventListener('click', outsideClickListener);
+    if (save) {
+      localStorage.setItem('selectedGenre', genre);
+    }
 
+    setActiveMenu(genre);
+    closeMenu();
     scrollToTop();
   }, 300);
 }
@@ -195,15 +208,25 @@ function scrollToTop() {
 function toggleMenu() {
   const menu = document.getElementById('navMenu');
   menu.classList.toggle('active');
-  document.addEventListener('click', outsideClickListener);
+
+  if (menu.classList.contains('active')) {
+    document.addEventListener('click', outsideClickListener);
+  } else {
+    document.removeEventListener('click', outsideClickListener);
+  }
+}
+
+function closeMenu() {
+  const menu = document.getElementById('navMenu');
+  menu.classList.remove('active');
+  document.removeEventListener('click', outsideClickListener);
 }
 
 function outsideClickListener(event) {
   const menu = document.getElementById('navMenu');
   const hamburger = document.querySelector('.hamburger');
   if (!menu.contains(event.target) && !hamburger.contains(event.target)) {
-    menu.classList.remove('active');
-    document.removeEventListener('click', outsideClickListener);
+    closeMenu();
   }
 }
 
