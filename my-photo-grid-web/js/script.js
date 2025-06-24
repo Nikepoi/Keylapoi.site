@@ -83,6 +83,21 @@ function displayPosts(postsToShow) {
   });
 }
 
+function renderLinks(label, links) {
+  let html = `<h4>Download via ${label}</h4><ul>`;
+
+  if (Array.isArray(links)) {
+    links.forEach((link, i) => {
+      html += `<li><a class="download-button" href="${decodeUrl(link)}" target="_blank">${label} ${i + 1}</a></li>`;
+    });
+  } else if (typeof links === 'string' && links.trim() !== '') {
+    html += `<li><a class="download-button" href="${decodeUrl(links)}" target="_blank">Full Konten</a></li>`;
+  }
+
+  html += `</ul>`;
+  return html;
+}
+
 function showOverlay(post) {
   const overlay = document.getElementById('overlay');
   const content = document.getElementById('overlayContent');
@@ -92,36 +107,20 @@ function showOverlay(post) {
     <h3>${post.title}</h3>
   `;
 
-  if (post.links?.videy?.length > 0) {
-    html += `<h4>Download via Videy</h4><ul>`;
-    post.links.videy.forEach((link, i) => {
-      html += `<li><a class="download-button" href="${decodeUrl(link)}" target="_blank">Videy ${i + 1}</a></li>`;
-    });
-    html += `</ul>`;
+  if (post.links?.videy) {
+    html += renderLinks('Videy', post.links.videy);
   }
 
-  if (post.links?.terabox?.length > 0) {
-    html += `<h4>Download via Terabox</h4><ul>`;
-    post.links.terabox.forEach(link => {
-      html += `<li><a class="download-button" href="${decodeUrl(link)}" target="_blank">Full Konten</a></li>`;
-    });
-    html += `</ul>`;
+  if (post.links?.terabox) {
+    html += renderLinks('Terabox', post.links.terabox);
   }
 
-  if (post.links?.mediafire?.length > 0) {
-    html += `<h4>Download via Mediafire</h4><ul>`;
-    post.links.mediafire.forEach((link, i) => {
-      html += `<li><a class="download-button" href="${decodeUrl(link)}" target="_blank">Full Konten</a></li>`;
-    });
-    html += `</ul>`;
+  if (post.links?.mediafire) {
+    html += renderLinks('Mediafire', post.links.mediafire);
   }
 
-  if (post.links?.pixeldrain?.length > 0) {
-    html += `<h4>Download via PixelDrain</h4><ul>`;
-    post.links.pixeldrain.forEach((link, i) => {
-      html += `<li><a class="download-button" href="${decodeUrl(link)}" target="_blank">Pixeldrain</a></li>`;
-    });
-    html += `</ul>`;
+  if (post.links?.pixeldrain) {
+    html += renderLinks('PixelDrain', post.links.pixeldrain);
   }
 
   content.innerHTML = html;
@@ -154,7 +153,6 @@ function filterPosts(genre) {
     updatePagination();
     hideLoader();
 
-    // Tutup menu otomatis
     const menu = document.getElementById('navMenu');
     menu.classList.remove('active');
     document.removeEventListener('click', outsideClickListener);
