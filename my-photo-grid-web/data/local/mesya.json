@@ -14,8 +14,12 @@
         "aHR0cHM6Ly9zbGljZWRyaXZlLmNvbS91cGxvYWQvP3Y9T1RaNUQ1UWkx",
         "aHR0cHM6Ly9zbGljZWRyaXZlLmNvbS91cGxvYWQvP3Y9Z0F0Tmw1QWwx"
       ],
-      "mediafire": "aHR0cHM6Ly93d3cubWVkaWFmaXJlLmNvbS9maWxlL2tkZnczZDU3YjZwa2NzZi9tZXN5YV9jaGFuLnppcC9maWxl",
-      "terabox": "aHR0cHM6Ly8xMDI0dGVyYWJveC5jb20vcy8xYjA3MWYwUEk5TTNrWFFpT0JVMUt5dw=="
+      "mediafire": [
+        "aHR0cHM6Ly93d3cubWVkaWFmaXJlLmNvbS9maWxlL2tkZnczZDU3YjZwa2NzZi9tZXN5YV9jaGFuLnppcC9maWxl"
+      ],
+      "terabox": [
+        "aHR0cHM6Ly8xMDI0dGVyYWJveC5jb20vcy8xYjA3MWYwUEk5TTNrWFFpT0JVMUt5dw=="
+      ]
     }
   }
 ]
