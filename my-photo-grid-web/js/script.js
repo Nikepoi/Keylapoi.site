@@ -35,6 +35,9 @@ async function loadAllPosts() {
     const indexRes = await fetch('data/index.json');
     const indexData = await indexRes.json();
 
+    // Balik urutan agar yang terakhir ditulis muncul paling atas
+    indexData.reverse();
+
     for (const entry of indexData) {
       const filePath = `data/${entry.file}`;
       const res = await fetch(filePath);
@@ -155,7 +158,7 @@ function filterPosts(genre, save = true) {
       filteredPosts = posts.filter(post => post.genre && post.genre.toLowerCase() === genre.toLowerCase());
     }
 
-    // Tidak ada sortir, urutan tetap sesuai index.json
+    // Urutan tetap sesuai index.json yang sudah dibalik
     displayPosts(getCurrentPagePosts());
     updatePagination();
     hideLoader();
