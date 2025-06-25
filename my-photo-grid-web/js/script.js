@@ -34,7 +34,9 @@ async function loadAllPosts() {
     const indexRes = await fetch('data/index.json');
     const indexData = await indexRes.json();
 
-    for (const entry of indexData) {
+    // Baca dari bawah biar terbaru di atas
+    for (let i = indexData.length - 1; i >= 0; i--) {
+      const entry = indexData[i];
       const filePath = `data/${entry.file}`;
       const res = await fetch(filePath);
       if (res.ok) {
@@ -42,8 +44,6 @@ async function loadAllPosts() {
         posts.push(post);
       }
     }
-
-    posts.reverse(); // Biar urutan kebalik, yang terbaru di atas
 
   } catch (err) {
     console.error("Gagal load post:", err);
