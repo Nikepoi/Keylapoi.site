@@ -203,7 +203,7 @@ function scrollToTop() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ANIMASI HAMBURGER
+// ==== ANIMASI HAMBURGER ====
 function toggleMenu() {
   const menu = document.getElementById('navMenu');
   const hamburger = document.querySelector('.hamburger');
@@ -252,7 +252,7 @@ function outsideClickListener(event) {
   }
 }
 
-// NAFIGASI BARU
+// ==== NAFIGASI BARU ====
 function navigate(event, genre) {
   event.preventDefault();
   history.pushState({ genre: genre }, '', genre === 'all' ? '/beranda' : '/' + genre);
@@ -268,7 +268,11 @@ window.addEventListener('popstate', (event) => {
 });
 
 window.addEventListener('load', async () => {
-  let path = window.location.pathname.replace('/', '') || 'beranda';
+  let path = window.location.pathname.replace('/', '');
+  if (path === '' || path === 'index.html') {
+    history.replaceState({ genre: 'all' }, '', '/beranda');
+    path = 'beranda';
+  }
   let genre = path === 'beranda' ? 'all' : path;
   await loadAllPosts();
   filterPosts(genre, false);
