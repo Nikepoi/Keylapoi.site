@@ -41,21 +41,55 @@ body.dark-mode .navbar {
 }
 
 .hamburger {
-  background: none;
-  border: none;
-  color: #333;
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 0.5rem;
-  z-index: 1002;
+  width: 30px;
+  height: 25px;
   position: relative;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  z-index: 1002;
 }
 
-body.dark-mode .hamburger {
-  color: #ddd;
+.hamburger span {
+  position: absolute;
+  height: 3px;
+  width: 100%;
+  background: #333;
+  left: 0;
+  transition: 0.3s ease;
+}
+
+body.dark-mode .hamburger span {
+  background: #ddd;
+}
+
+.hamburger span:nth-child(1) {
+  top: 0;
+}
+
+.hamburger span:nth-child(2) {
+  top: 11px;
+}
+
+.hamburger span:nth-child(3) {
+  top: 22px;
+}
+
+.hamburger.is-active span:nth-child(1) {
+  transform: rotate(45deg);
+  top: 11px;
+}
+
+.hamburger.is-active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.is-active span:nth-child(3) {
+  transform: rotate(-45deg);
+  top: 11px;
 }
 
 .nav-menu {
+  display: none;
   position: fixed;
   top: 0;
   right: 0;
@@ -65,13 +99,14 @@ body.dark-mode .hamburger {
   list-style: none;
   padding-top: 4rem;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease, opacity 0.3s ease;
   transform: scale(0);
   transform-origin: top right;
   opacity: 0;
-  transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
 .nav-menu.active {
+  display: block;
   transform: scale(1);
   opacity: 1;
 }
@@ -104,21 +139,6 @@ body.dark-mode .nav-menu li a {
 
 .active-menu {
   color: #ffd700 !important;
-}
-
-.close-menu {
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 1.5rem;
-  position: absolute;
-  top: 15px;
-  right: 20px;
-  cursor: pointer;
-}
-
-body.dark-mode .close-menu {
-  color: #ddd;
 }
 
 /* Grid Post Container */
@@ -369,19 +389,3 @@ body.dark-mode .site-footer {
   border-radius: 5px;
   padding: 0.5rem;
 }
-
-@media screen and (max-width: 480px) {
-  .grid-container {
-    grid-template-columns: 1fr;
-  }
-
-  .toolbar {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .toolbar input {
-    width: 100%;
-    max-width: 300px;
-  }
-                             }
