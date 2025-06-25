@@ -1,3 +1,4 @@
+
 let posts = [];
 let filteredPosts = [];
 let currentPage = 1;
@@ -29,24 +30,17 @@ async function loadAllPosts() {
   showLoader();
   posts.length = 0;
   currentPage = 1;
-  const loadedIds = new Set();
 
   try {
     const indexRes = await fetch('data/index.json');
     const indexData = await indexRes.json();
-
-    // Balik urutan agar yang terakhir ditulis muncul paling atas
-    indexData.reverse();
 
     for (const entry of indexData) {
       const filePath = `data/${entry.file}`;
       const res = await fetch(filePath);
       if (res.ok) {
         const post = await res.json();
-        if (!loadedIds.has(post.id)) {
-          loadedIds.add(post.id);
-          posts.push(post);
-        }
+        posts.push(post);
       }
     }
   } catch (err) {
@@ -158,7 +152,6 @@ function filterPosts(genre, save = true) {
       filteredPosts = posts.filter(post => post.genre && post.genre.toLowerCase() === genre.toLowerCase());
     }
 
-    // Urutan tetap sesuai index.json yang sudah dibalik
     displayPosts(getCurrentPagePosts());
     updatePagination();
     hideLoader();
