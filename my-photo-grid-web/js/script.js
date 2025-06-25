@@ -48,8 +48,6 @@ async function loadAllPosts() {
     }
 
     posts.sort((a, b) => new Date(b.date) - new Date(a.date));
-    let savedGenre = localStorage.getItem('selectedGenre') || 'all';
-    filterPosts(savedGenre, false);
   } catch (err) {
     console.error("Gagal load post:", err);
   } finally {
@@ -205,7 +203,7 @@ function scrollToTop() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ==== ANIMASI HAMBURGER POP-OUT + ICON BERUBAH ====
+// ANIMASI HAMBURGER
 function toggleMenu() {
   const menu = document.getElementById('navMenu');
   const hamburger = document.querySelector('.hamburger');
@@ -254,4 +252,24 @@ function outsideClickListener(event) {
   }
 }
 
-window.addEventListener('load', () => loadAllPosts());
+// NAFIGASI BARU
+function navigate(event, genre) {
+  event.preventDefault();
+  history.pushState({ genre: genre }, '', genre === 'all' ? '/beranda' : '/' + genre);
+  filterPosts(genre);
+}
+
+window.addEventListener('popstate', (event) => {
+  if (event.state && event.state.genre) {
+    filterPosts(event.state.genre, false);
+  } else {
+    filterPosts('all', false);
+  }
+});
+
+window.addEventListener('load', async () => {
+  let path = window.location.pathname.replace('/', '') || 'beranda';
+  let genre = path === 'beranda' ? 'all' : path;
+  await loadAllPosts();
+  filterPosts(genre, false);
+});
