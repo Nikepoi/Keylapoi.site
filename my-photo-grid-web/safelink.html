@@ -3,11 +3,149 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Safelink - Keylapoi</title>
-  <meta name="description" content="Safelink halaman Keylapoi">
-  <link rel="icon" href="favicon.ico" type="image/x-icon" />
-  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      color: #333;
+      line-height: 1.5;
+    }
+
+    nav.navbar {
+      background-color: #5b3b84;
+      color: white;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    nav .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .hamburger {
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .nav-menu {
+      display: none;
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      overflow: hidden;
+      z-index: 1000;
+    }
+
+    .nav-menu.active {
+      display: block;
+    }
+
+    .nav-menu li {
+      list-style: none;
+    }
+
+    .nav-menu li a {
+      display: block;
+      padding: 10px 20px;
+      text-decoration: none;
+      color: #333;
+    }
+
+    .nav-menu li a:hover {
+      background-color: #f0f0f0;
+    }
+
+    main.grid-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 80vh;
+      padding: 20px;
+    }
+
+    .download-container {
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #000;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      width: 95%;
+      max-width: 600px;
+    }
+
+    .download-button {
+      display: block;
+      width: 100%;
+      padding: 14px 0;
+      font-size: 16px;
+      font-weight: bold;
+      color: #fff;
+      background-color: #5b3b84;
+      border: 1px solid #5b3b84;
+      border-radius: 5px;
+      text-align: center;
+      text-decoration: none;
+      transition: background-color 0.2s ease;
+      margin-top: 10px;
+    }
+
+    .download-button:hover {
+      background-color: #462a66;
+    }
+
+    .download-button:disabled {
+      background-color: #ccc;
+      border-color: #ccc;
+      color: #666;
+      cursor: not-allowed;
+    }
+
+    .notice {
+      font-size: 18px;
+      font-weight: bold;
+      color: #5b3b84;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .popup-instruction {
+      font-size: 14px;
+      color: #462a66;
+      font-weight: bold;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .site-footer {
+      border-top: 1px solid #ccc;
+      padding: 15px 0;
+      text-align: center;
+      font-size: 14px;
+      color: #555;
+    }
+
+    @media (max-width: 768px) {
+      .download-container {
+        margin: 20px 10px;
+        width: 95%;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -21,7 +159,7 @@
       <button class="close-menu" onclick="toggleMenu()">
         <img src="close_icon.svg" alt="Close" width="30">
       </button>
-      <li><a href="index.html#beranda">Halaman utama</a></li>
+      <li><a href="index.html#all">Halaman utama</a></li>
       <li><a href="index.html#local">Bokep local</a></li>
       <li><a href="index.html#asia">Bokep asia</a></li>
       <li><a href="index.html#barat">Bokep barat</a></li>
@@ -34,32 +172,32 @@
 
   <!-- Safelink Content -->
   <main class="grid-container">
-    <div class="grid-item" style="max-width:600px; margin:auto; text-align:center; padding:20px;">
+    <div class="download-container">
 
       <!-- Iklan Popunder -->
       <div id="popunder-slot" style="margin-bottom: 15px;">
-        <script>(function (s, u, z, p) { s.src = u, s.setAttribute('data-zone', z), p.appendChild(s); })(document.createElement('script'), 'https://al5sm.com/tag.min.js', 9482531, document.body || document.documentElement)</script>
+        <script>(function(s,u,z,p){s.src=u,s.setAttribute('data-zone',z),p.appendChild(s);})(document.createElement('script'),'https://al5sm.com/tag.min.js',9482531,document.body||document.documentElement)</script>
       </div>
 
       <noscript>
         <p class="notice">JavaScript dinonaktifkan. Aktifkan untuk melanjutkan ke konten.</p>
       </noscript>
 
-      <p id="noticeMessage" class="notice" style="margin-bottom: 10px; font-weight: bold; color: #5b3b84;">Link valid, klik OK untuk melanjutkan</p>
-      <p class="popup-instruction" style="margin-bottom: 20px; font-weight: bold;">Pastikan pop-up diizinkan di browser kamu ya!</p>
+      <p id="noticeMessage" class="notice">Link valid, klik OK untuk melanjutkan</p>
+      <p class="popup-instruction">Pastikan pop-up diizinkan di browser kamu ya!</p>
 
-      <a id="redirectButton" class="download-button" style="display: none; width: 100%; padding: 14px 0;" href="#" onclick="showPopup()">OK</a>
+      <a id="redirectButton" class="download-button" style="display: none;" href="#" onclick="showPopup()">OK</a>
 
-      <div class="policy-section" style="margin-top: 30px; text-align: left;">
+      <div class="policy-section">
         <h4>Kebijakan Penggunaan Halaman Savelink</h4>
         <p>Halaman ini bertujuan mengarahkan kamu ke konten eksternal seperti Videy dan Terabox. Link diolah otomatis untuk kenyamanan pengguna.</p>
         <p><strong>Privasi:</strong> Tidak ada data pribadi yang dikumpulkan.</p>
         <p><strong>Disclaimer:</strong> Kami tidak bertanggung jawab atas konten di situs tujuan.</p>
       </div>
 
-      <div class="copyright-section" style="margin-top: 20px; text-align: left;">
+      <div class="copyright-section">
         <h4>Hak Cipta</h4>
-        <p>© 2025 Keylapoi. Dilarang menyalin tanpa izin.</p>
+        <p>© 2025 KeylaPoi. Dilarang menyalin tanpa izin.</p>
       </div>
     </div>
   </main>
@@ -73,6 +211,8 @@
   <script>
     function toggleMenu() {
       const menu = document.getElementById('navMenu');
+      const hamburger = document.querySelector('.hamburger');
+
       if (menu.classList.contains('active')) {
         menu.classList.remove('active');
       } else {
@@ -128,7 +268,6 @@
       redirectButton.textContent = 'Memproses...';
     }
   </script>
-
 </body>
 
   </html>
