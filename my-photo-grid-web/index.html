@@ -1,4 +1,7 @@
-<!DOCTYPE html><html lang="id"><head>
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Keylapoi</title>
@@ -8,15 +11,17 @@
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-</head><body>
+</head>
+
+<body>
   <nav class="navbar">
     <div class="logo">KEYPOI</div>
     <button class="hamburger" onclick="toggleMenu()">
-      <i class="fa-light fa-bars fa-2x"></i>
+      <i class="fa-light fa-square-xmark"></i>
     </button>
     <ul class="nav-menu" id="navMenu">
       <button class="close-menu" onclick="toggleMenu()">
-        <i class="fa-light fa-square-xmark fa-2x"></i>
+        <i class="fa-light fa-square-xmark"></i>
       </button>
       <li><a href="#" onclick="filterPosts('all')">Halaman utama</a></li>
       <li><a href="#" onclick="filterPosts('local')">Bokep local</a></li>
@@ -27,14 +32,29 @@
       <li><a href="#" onclick="filterPosts('barat_random')">Bokep Random Barat</a></li>
       <li><a href="#" onclick="filterPosts('jav')">JAV Sub indo</a></li>
     </ul>
-  </nav>  <main class="grid-container" id="postGrid"></main>  <div class="pagination">
+  </nav>
+
+  <main class="grid-container" id="postGrid"></main>
+
+  <div class="pagination">
     <button id="prevBtn" onclick="prevPage()">Previous</button>
     <button id="nextBtn" onclick="nextPage()">Next</button>
-  </div>  <div id="overlay" class="overlay" onclick="closeOverlay(event)">
+  </div>
+
+  <div id="overlay" class="overlay" onclick="closeOverlay(event)">
     <div class="overlay-content" id="overlayContent"></div>
     <button class="close-btn" onclick="closeOverlay(event)">Tutup</button>
-  </div>  <div id="blur-loader" class="blur-loader" style="display: none;">
+  </div>
+
+  <div id="blur-loader" class="blur-loader" style="display: none;">
     <span class="loading-dots"></span>
-  </div>  <footer class="site-footer">
+  </div>
+
+  <footer class="site-footer">
     <p>&copy; 2025 Keylapoi. All rights reserved.</p>
-  </footer>  <script src="js/script.js"></script></body></html>
+  </footer>
+
+  <script src="js/script.js"></script>
+</body>
+
+</html>
