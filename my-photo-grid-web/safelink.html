@@ -5,7 +5,147 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Safelink - Keylapoi</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      color: #333;
+      line-height: 1.5;
+    }
+
+    nav.navbar {
+      background-color: #5b3b84;
+      color: white;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    nav .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .hamburger {
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .nav-menu {
+      display: none;
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      overflow: hidden;
+      z-index: 1000;
+    }
+
+    .nav-menu.active {
+      display: block;
+    }
+
+    .nav-menu li {
+      list-style: none;
+    }
+
+    .nav-menu li a {
+      display: block;
+      padding: 10px 20px;
+      text-decoration: none;
+      color: #333;
+    }
+
+    .nav-menu li a:hover {
+      background-color: #f0f0f0;
+    }
+
+    main.grid-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 80vh;
+      padding: 20px;
+    }
+
+    .download-container {
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #000;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      width: 95%;
+      max-width: 600px;
+    }
+
+    .download-button {
+      display: block;
+      width: 100%;
+      padding: 14px 0;
+      font-size: 16px;
+      font-weight: bold;
+      color: #fff;
+      background-color: #5b3b84;
+      border: 1px solid #5b3b84;
+      border-radius: 5px;
+      text-align: center;
+      text-decoration: none;
+      transition: background-color 0.2s ease;
+      margin-top: 10px;
+    }
+
+    .download-button:hover {
+      background-color: #462a66;
+    }
+
+    .download-button:disabled {
+      background-color: #ccc;
+      border-color: #ccc;
+      color: #666;
+      cursor: not-allowed;
+    }
+
+    .notice {
+      font-size: 18px;
+      font-weight: bold;
+      color: #5b3b84;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .popup-instruction {
+      font-size: 14px;
+      color: #462a66;
+      font-weight: bold;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .site-footer {
+      border-top: 1px solid #ccc;
+      padding: 15px 0;
+      text-align: center;
+      font-size: 14px;
+      color: #555;
+    }
+
+    @media (max-width: 768px) {
+      .download-container {
+        margin: 20px 10px;
+        width: 95%;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -31,7 +171,7 @@
   </nav>
 
   <!-- Safelink Content -->
-  <main class="grid-container" style="display: flex; justify-content: center; align-items: center; min-height: 80vh; padding: 20px;">
+  <main class="grid-container">
     <div class="download-container">
 
       <!-- Iklan Popunder -->
@@ -40,7 +180,7 @@
       </div>
 
       <noscript>
-        <p class="noscript-message">JavaScript dinonaktifkan. Aktifkan untuk melanjutkan ke konten.</p>
+        <p class="notice">JavaScript dinonaktifkan. Aktifkan untuk melanjutkan ke konten.</p>
       </noscript>
 
       <p id="noticeMessage" class="notice">Link valid, klik OK untuk melanjutkan</p>
@@ -63,7 +203,7 @@
   </main>
 
   <!-- Footer -->
-  <footer class="site-footer" style="border-top: 1px solid #ccc; padding: 15px 0; text-align: center;">
+  <footer class="site-footer">
     <p>&copy; 2025 Keylapoi. All rights reserved.</p>
   </footer>
 
@@ -74,45 +214,9 @@
       const hamburger = document.querySelector('.hamburger');
 
       if (menu.classList.contains('active')) {
-        menu.style.transformOrigin = 'top right';
-        menu.style.transform = 'scale(0)';
-        menu.style.opacity = '0';
-        hamburger.classList.remove('is-active');
-        setTimeout(() => {
-          menu.classList.remove('active');
-        }, 300);
+        menu.classList.remove('active');
       } else {
         menu.classList.add('active');
-        menu.style.transformOrigin = 'top right';
-        setTimeout(() => {
-          menu.style.transform = 'scale(1)';
-          menu.style.opacity = '1';
-        }, 10);
-        hamburger.classList.add('is-active');
-        document.addEventListener('click', outsideClickListener);
-      }
-    }
-
-    function outsideClickListener(event) {
-      const menu = document.getElementById('navMenu');
-      const hamburger = document.querySelector('.hamburger');
-      if (!menu.contains(event.target) && !hamburger.contains(event.target)) {
-        closeMenu();
-      }
-    }
-
-    function closeMenu() {
-      const menu = document.getElementById('navMenu');
-      const hamburger = document.querySelector('.hamburger');
-      if (menu.classList.contains('active')) {
-        menu.style.transformOrigin = 'top right';
-        menu.style.transform = 'scale(0)';
-        menu.style.opacity = '0';
-        hamburger.classList.remove('is-active');
-        setTimeout(() => {
-          menu.classList.remove('active');
-        }, 300);
-        document.removeEventListener('click', outsideClickListener);
       }
     }
   </script>
