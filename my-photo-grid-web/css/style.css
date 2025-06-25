@@ -48,6 +48,35 @@ body.dark-mode .navbar {
   cursor: pointer;
 }
 
+.hamburger i {
+  font-size: 2rem;
+}
+
+.close-menu {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background-color: #ffd700;
+  color: #000;
+  border: none;
+  width: 40px;
+  height: 40px;
+  font-size: 1.5rem;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.close-menu i {
+  font-size: 1.8rem;
+}
+
+.close-menu:hover {
+  background-color: #e6c200;
+}
+
 .nav-menu {
   display: none;
   position: fixed;
@@ -107,24 +136,6 @@ body.dark-mode .nav-menu li a {
   padding: 0.5rem;
 }
 
-.close-menu {
-  position: absolute;
-  top: 15px;
-  right: 20px;
-  background-color: #ffd700;
-  color: #000;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  font-size: 2rem;
-  border-radius: 50%;
-  cursor: pointer;
-}
-
-.close-menu:hover {
-  background-color: #e6c200;
-}
-
-/* Grid Post Container */
 .grid-container {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -165,7 +176,6 @@ body.dark-mode .grid-item {
   object-fit: cover;
 }
 
-/* Pagination */
 .pagination {
   text-align: center;
   padding: 1rem;
@@ -187,7 +197,6 @@ body.dark-mode .grid-item {
   background-color: #333333;
 }
 
-/* Loading */
 .loading {
   text-align: center;
   display: none;
@@ -201,7 +210,6 @@ body.dark-mode .loading {
   color: #666666;
 }
 
-/* Loader */
 .blur-loader {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -230,7 +238,6 @@ body.dark-mode .loading {
   100% { width: 0; }
 }
 
-/* Overlay */
 .overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -324,7 +331,6 @@ body.dark-mode .overlay-content h4 {
   background-color: #333333;
 }
 
-/* Footer */
 .site-footer {
   background-color: #ffffff;
   color: #333333;
@@ -345,4 +351,4 @@ body.dark-mode .site-footer {
   color: #000;
   border-radius: 5px;
   padding: 0.5rem;
-  }
+}
