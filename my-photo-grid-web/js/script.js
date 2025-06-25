@@ -46,8 +46,6 @@ async function loadAllPosts() {
         }
       }
     }
-
-    posts.sort((a, b) => new Date(b.date) - new Date(a.date));
   } catch (err) {
     console.error("Gagal load post:", err);
   } finally {
@@ -157,7 +155,7 @@ function filterPosts(genre, save = true) {
       filteredPosts = posts.filter(post => post.genre && post.genre.toLowerCase() === genre.toLowerCase());
     }
 
-    filteredPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
+    // Tidak ada sortir, urutan tetap sesuai index.json
     displayPosts(getCurrentPagePosts());
     updatePagination();
     hideLoader();
@@ -203,7 +201,6 @@ function scrollToTop() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ANIMASI HAMBURGER
 function toggleMenu() {
   const menu = document.getElementById('navMenu');
   const hamburger = document.querySelector('.hamburger');
