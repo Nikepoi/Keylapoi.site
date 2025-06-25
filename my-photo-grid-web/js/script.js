@@ -140,7 +140,7 @@ function setActiveMenu(genre) {
   const menuLinks = document.querySelectorAll('.nav-menu li a');
   menuLinks.forEach(link => {
     link.classList.remove('active-genre');
-    if (link.getAttribute('onclick').includes(`'${genre}'`)) {
+    if (link.getAttribute('href') === `#${genre}`) {
       link.classList.add('active-genre');
     }
   });
@@ -151,7 +151,7 @@ function filterPosts(genre, save = true) {
   setTimeout(() => {
     currentPage = 1;
 
-    if (genre === 'all') {
+    if (genre === 'all' || genre === 'beranda') {
       filteredPosts = posts;
     } else {
       filteredPosts = posts.filter(post => post.genre && post.genre.toLowerCase() === genre.toLowerCase());
@@ -163,7 +163,7 @@ function filterPosts(genre, save = true) {
     hideLoader();
 
     if (save) {
-      localStorage.setItem('selectedGenre', genre);
+      window.location.hash = genre === 'all' ? 'beranda' : genre;
     }
 
     setActiveMenu(genre);
@@ -203,7 +203,7 @@ function scrollToTop() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ==== ANIMASI HAMBURGER ====
+// ANIMASI HAMBURGER
 function toggleMenu() {
   const menu = document.getElementById('navMenu');
   const hamburger = document.querySelector('.hamburger');
@@ -252,28 +252,13 @@ function outsideClickListener(event) {
   }
 }
 
-// ==== NAFIGASI BARU ====
-function navigate(event, genre) {
-  event.preventDefault();
-  history.pushState({ genre: genre }, '', genre === 'all' ? '/beranda' : '/' + genre);
-  filterPosts(genre);
-}
-
-window.addEventListener('popstate', (event) => {
-  if (event.state && event.state.genre) {
-    filterPosts(event.state.genre, false);
-  } else {
-    filterPosts('all', false);
-  }
+window.addEventListener('hashchange', () => {
+  let genre = window.location.hash.replace('#', '') || 'beranda';
+  filterPosts(genre, false);
 });
 
 window.addEventListener('load', async () => {
-  let path = window.location.pathname.replace('/', '');
-  if (path === '' || path === 'index.html') {
-    history.replaceState({ genre: 'all' }, '', '/beranda');
-    path = 'beranda';
-  }
-  let genre = path === 'beranda' ? 'all' : path;
+  let genre = window.location.hash.replace('#', '') || 'beranda';
   await loadAllPosts();
   filterPosts(genre, false);
 });
