@@ -205,21 +205,45 @@ function scrollToTop() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// ==== ANIMASI HAMBURGER POP-OUT + ICON BERUBAH ====
 function toggleMenu() {
   const menu = document.getElementById('navMenu');
-  menu.classList.toggle('active');
+  const hamburger = document.querySelector('.hamburger');
 
   if (menu.classList.contains('active')) {
-    document.addEventListener('click', outsideClickListener);
+    menu.style.transformOrigin = 'top right';
+    menu.style.transform = 'scale(0)';
+    menu.style.opacity = '0';
+    hamburger.classList.remove('is-active');
+    setTimeout(() => {
+      menu.classList.remove('active');
+    }, 300);
   } else {
-    document.removeEventListener('click', outsideClickListener);
+    menu.classList.add('active');
+    menu.style.transformOrigin = 'top right';
+    setTimeout(() => {
+      menu.style.transform = 'scale(1)';
+      menu.style.opacity = '1';
+    }, 10);
+    hamburger.classList.add('is-active');
+    document.addEventListener('click', outsideClickListener);
   }
 }
 
 function closeMenu() {
   const menu = document.getElementById('navMenu');
-  menu.classList.remove('active');
-  document.removeEventListener('click', outsideClickListener);
+  const hamburger = document.querySelector('.hamburger');
+
+  if (menu.classList.contains('active')) {
+    menu.style.transformOrigin = 'top right';
+    menu.style.transform = 'scale(0)';
+    menu.style.opacity = '0';
+    hamburger.classList.remove('is-active');
+    setTimeout(() => {
+      menu.classList.remove('active');
+    }, 300);
+    document.removeEventListener('click', outsideClickListener);
+  }
 }
 
 function outsideClickListener(event) {
