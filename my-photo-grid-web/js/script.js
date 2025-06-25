@@ -1,275 +1,119 @@
-let posts = [];
-let filteredPosts = [];
-let currentPage = 1;
-const postsPerPage = 20;
+// keylapoi.js FINAL let posts = []; let filteredPosts = []; let currentPage = 1; const postsPerPage = 20;
 
-function decodeUrl(encodedUrl) {
-  try {
-    const decoded = atob(encodedUrl);
-    const url = new URL(decoded);
-    const hostname = url.hostname;
-    const targetDomains = ['videy.co', 'mediafire', 'terabox', 'pixeldrain'];
-    const isTarget = targetDomains.some(domain => hostname.includes(domain));
-    return isTarget ? `https://www.keylapoi.site/safelink.html?url=${encodedUrl}` : decoded;
-  } catch (e) {
-    console.error("Gagal decode:", encodedUrl);
-    return "#";
-  }
-}
+function decodeUrl(encodedUrl) { try { const decoded = atob(encodedUrl); const url = new URL(decoded); const hostname = url.hostname; const targetDomains = ['videy.co', 'mediafire', 'terabox', 'pixeldrain']; const isTarget = targetDomains.some(domain => hostname.includes(domain)); return isTarget ? https://www.keylapoi.site/safelink.html?url=${encodedUrl} : decoded; } catch (e) { console.error("Gagal decode:", encodedUrl); return "#"; } }
 
-function showLoader() {
-  document.getElementById('blur-loader').style.display = 'flex';
-}
+function showLoader() { document.getElementById('blur-loader').style.display = 'flex'; }
 
-function hideLoader() {
-  document.getElementById('blur-loader').style.display = 'none';
-}
+function hideLoader() { document.getElementById('blur-loader').style.display = 'none'; }
 
-async function loadAllPosts() {
-  showLoader();
-  posts.length = 0;
-  currentPage = 1;
-  const loadedIds = new Set();
+async function loadAllPosts() { showLoader(); posts.length = 0; currentPage = 1; const loadedIds = new Set();
 
-  try {
-    const indexRes = await fetch('data/index.json');
-    const indexData = await indexRes.json();
+try { const indexRes = await fetch('data/index.json'); const indexData = await indexRes.json();
 
-    for (const entry of indexData) {
-      const filePath = `data/${entry.file}`;
-      const res = await fetch(filePath);
-      if (res.ok) {
-        const post = await res.json();
-        if (!loadedIds.has(post.id)) {
-          loadedIds.add(post.id);
-          posts.push(post);
-        }
-      }
+for (const entry of indexData) {
+  const filePath = `data/${entry.file}`;
+  const res = await fetch(filePath);
+  if (res.ok) {
+    const post = await res.json();
+    if (!loadedIds.has(post.id)) {
+      loadedIds.add(post.id);
+      posts.push(post);
     }
-
-    posts.sort((a, b) => new Date(b.date) - new Date(a.date));
-  } catch (err) {
-    console.error("Gagal load post:", err);
-  } finally {
-    hideLoader();
   }
 }
 
-function getCurrentPagePosts() {
-  const start = (currentPage - 1) * postsPerPage;
-  const end = start + postsPerPage;
-  return filteredPosts.slice(start, end);
+posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+} catch (err) { console.error("Gagal load post:", err); } finally { hideLoader(); } }
+
+function getCurrentPagePosts() { const start = (currentPage - 1) * postsPerPage; const end = start + postsPerPage; return filteredPosts.slice(start, end); }
+
+function displayPosts(postsToShow) { const gridContainer = document.getElementById('postGrid'); gridContainer.innerHTML = '';
+
+postsToShow.forEach(post => { const postElement = document.createElement('div'); postElement.classList.add('grid-item');
+
+const img = document.createElement('img');
+img.src = post.image;
+img.alt = post.title;
+img.loading = "lazy";
+img.onclick = () => showOverlay(post);
+
+postElement.appendChild(img);
+gridContainer.appendChild(postElement);
+
+}); }
+
+function renderLinks(label, links) { let html = <h4>Download via ${label}</h4><ul>;
+
+if (Array.isArray(links)) { links.forEach((link, i) => { html += <li><a class="download-button" href="${decodeUrl(link)}" target="_blank">${label} ${i + 1}</a></li>; }); } else if (typeof links === 'string' && links.trim() !== '') { html += <li><a class="download-button" href="${decodeUrl(links)}" target="_blank">Full Konten</a></li>; }
+
+html += </ul>; return html; }
+
+function showOverlay(post) { const overlay = document.getElementById('overlay'); const content = document.getElementById('overlayContent');
+
+let html = <img src="${post.image}" alt="${post.title}" style="width: 100%; height: auto; max-height: 60vh; object-fit: contain;" /> <h3>${post.title}</h3>;
+
+if (post.links?.videy) { html += renderLinks('Videy', post.links.videy); }
+
+if (post.links?.terabox) { html += renderLinks('Terabox', post.links.terabox); }
+
+if (post.links?.mediafire) { html += renderLinks('Mediafire', post.links.mediafire); }
+
+if (post.links?.pixeldrain) { html += renderLinks('PixelDrain', post.links.pixeldrain); }
+
+content.innerHTML = html; overlay.style.display = "flex"; }
+
+function closeOverlay(event) { if (event.target.id === "overlay" || event.target.classList.contains("close-btn")) { document.getElementById('overlay').style.display = "none"; } }
+
+function updatePagination() { const totalPages = Math.ceil(filteredPosts.length / postsPerPage); document.getElementById('prevBtn').style.display = currentPage > 1 ? 'inline-block' : 'none'; document.getElementById('nextBtn').style.display = currentPage < totalPages ? 'inline-block' : 'none'; }
+
+function setActiveMenu(genre) { const menuLinks = document.querySelectorAll('.nav-menu li a'); menuLinks.forEach(link => { link.classList.remove('active-genre'); if (link.getAttribute('onclick').includes('${genre}')) { link.classList.add('active-genre'); } }); }
+
+function filterPosts(genre, save = true) { showLoader(); setTimeout(() => { currentPage = 1;
+
+if (genre === 'all') {
+  filteredPosts = posts;
+} else {
+  filteredPosts = posts.filter(post => post.genre && post.genre.toLowerCase() === genre.toLowerCase());
 }
 
-function displayPosts(postsToShow) {
-  const gridContainer = document.getElementById('postGrid');
-  gridContainer.innerHTML = '';
+filteredPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
+displayPosts(getCurrentPagePosts());
+updatePagination();
+hideLoader();
 
-  postsToShow.forEach(post => {
-    const postElement = document.createElement('div');
-    postElement.classList.add('grid-item');
-
-    const img = document.createElement('img');
-    img.src = post.image;
-    img.alt = post.title;
-    img.loading = "lazy";
-    img.onclick = () => showOverlay(post);
-
-    postElement.appendChild(img);
-    gridContainer.appendChild(postElement);
-  });
+if (save) {
+  localStorage.setItem('selectedGenre', genre);
+  history.pushState({ genre }, '', genre === 'all' ? '/beranda' : `/${genre}`);
 }
 
-function renderLinks(label, links) {
-  let html = `<h4>Download via ${label}</h4><ul>`;
+setActiveMenu(genre);
+closeMenu();
+scrollToTop();
 
-  if (Array.isArray(links)) {
-    links.forEach((link, i) => {
-      html += `<li><a class="download-button" href="${decodeUrl(link)}" target="_blank">${label} ${i + 1}</a></li>`;
-    });
-  } else if (typeof links === 'string' && links.trim() !== '') {
-    html += `<li><a class="download-button" href="${decodeUrl(links)}" target="_blank">Full Konten</a></li>`;
-  }
+}, 300); }
 
-  html += `</ul>`;
-  return html;
-}
+function nextPage() { showLoader(); setTimeout(() => { const totalPages = Math.ceil(filteredPosts.length / postsPerPage); if (currentPage < totalPages) { currentPage++; displayPosts(getCurrentPagePosts()); updatePagination(); scrollToTop(); } hideLoader(); }, 300); }
 
-function showOverlay(post) {
-  const overlay = document.getElementById('overlay');
-  const content = document.getElementById('overlayContent');
+function prevPage() { showLoader(); setTimeout(() => { if (currentPage > 1) { currentPage--; displayPosts(getCurrentPagePosts()); updatePagination(); scrollToTop(); } hideLoader(); }, 300); }
 
-  let html = `
-    <img src="${post.image}" alt="${post.title}" style="width: 100%; height: auto; max-height: 60vh; object-fit: contain;" />
-    <h3>${post.title}</h3>
-  `;
+function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
 
-  if (post.links?.videy) {
-    html += renderLinks('Videy', post.links.videy);
-  }
+function toggleMenu() { const menu = document.getElementById('navMenu'); const hamburger = document.querySelector('.hamburger');
 
-  if (post.links?.terabox) {
-    html += renderLinks('Terabox', post.links.terabox);
-  }
+if (menu.classList.contains('active')) { menu.style.transformOrigin = 'top right'; menu.style.transform = 'scale(0)'; menu.style.opacity = '0'; hamburger.classList.remove('is-active'); setTimeout(() => { menu.classList.remove('active'); }, 300); } else { menu.classList.add('active'); menu.style.transformOrigin = 'top right'; setTimeout(() => { menu.style.transform = 'scale(1)'; menu.style.opacity = '1'; }, 10); hamburger.classList.add('is-active'); document.addEventListener('click', outsideClickListener); } }
 
-  if (post.links?.mediafire) {
-    html += renderLinks('Mediafire', post.links.mediafire);
-  }
+function closeMenu() { const menu = document.getElementById('navMenu'); const hamburger = document.querySelector('.hamburger');
 
-  if (post.links?.pixeldrain) {
-    html += renderLinks('PixelDrain', post.links.pixeldrain);
-  }
+if (menu.classList.contains('active')) { menu.style.transformOrigin = 'top right'; menu.style.transform = 'scale(0)'; menu.style.opacity = '0'; hamburger.classList.remove('is-active'); setTimeout(() => { menu.classList.remove('active'); }, 300); document.removeEventListener('click', outsideClickListener); } }
 
-  content.innerHTML = html;
-  overlay.style.display = "flex";
-}
+function outsideClickListener(event) { const menu = document.getElementById('navMenu'); const hamburger = document.querySelector('.hamburger'); if (!menu.contains(event.target) && !hamburger.contains(event.target)) { closeMenu(); } }
 
-function closeOverlay(event) {
-  if (event.target.id === "overlay" || event.target.classList.contains("close-btn")) {
-    document.getElementById('overlay').style.display = "none";
-  }
-}
+window.addEventListener('popstate', event => { const genre = event.state?.genre || 'all'; filterPosts(genre, false); });
 
-function updatePagination() {
-  const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
-  document.getElementById('prevBtn').style.display = currentPage > 1 ? 'inline-block' : 'none';
-  document.getElementById('nextBtn').style.display = currentPage < totalPages ? 'inline-block' : 'none';
-}
+window.addEventListener('load', async () => { let path = window.location.pathname.replace('/', '') || 'beranda'; let genre = path === 'beranda' ? 'all' : path;
 
-function setActiveMenu(genre) {
-  const menuLinks = document.querySelectorAll('.nav-menu li a');
-  menuLinks.forEach(link => {
-    link.classList.remove('active-genre');
-    if (link.getAttribute('onclick').includes(`'${genre}'`)) {
-      link.classList.add('active-genre');
-    }
-  });
-}
+await loadAllPosts(); filterPosts(genre, false);
 
-function filterPosts(genre, save = true) {
-  showLoader();
-  setTimeout(() => {
-    currentPage = 1;
+if (window.location.pathname === '/') { history.replaceState({ genre: 'all' }, '', '/beranda'); } });
 
-    if (genre === 'all') {
-      filteredPosts = posts;
-    } else {
-      filteredPosts = posts.filter(post => post.genre && post.genre.toLowerCase() === genre.toLowerCase());
-    }
-
-    filteredPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
-    displayPosts(getCurrentPagePosts());
-    updatePagination();
-    hideLoader();
-
-    if (save) {
-      localStorage.setItem('selectedGenre', genre);
-    }
-
-    setActiveMenu(genre);
-    closeMenu();
-    scrollToTop();
-  }, 300);
-}
-
-function nextPage() {
-  showLoader();
-  setTimeout(() => {
-    const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
-    if (currentPage < totalPages) {
-      currentPage++;
-      displayPosts(getCurrentPagePosts());
-      updatePagination();
-      scrollToTop();
-    }
-    hideLoader();
-  }, 300);
-}
-
-function prevPage() {
-  showLoader();
-  setTimeout(() => {
-    if (currentPage > 1) {
-      currentPage--;
-      displayPosts(getCurrentPagePosts());
-      updatePagination();
-      scrollToTop();
-    }
-    hideLoader();
-  }, 300);
-}
-
-function scrollToTop() {
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-// ANIMASI HAMBURGER
-function toggleMenu() {
-  const menu = document.getElementById('navMenu');
-  const hamburger = document.querySelector('.hamburger');
-
-  if (menu.classList.contains('active')) {
-    menu.style.transformOrigin = 'top right';
-    menu.style.transform = 'scale(0)';
-    menu.style.opacity = '0';
-    hamburger.classList.remove('is-active');
-    setTimeout(() => {
-      menu.classList.remove('active');
-    }, 300);
-  } else {
-    menu.classList.add('active');
-    menu.style.transformOrigin = 'top right';
-    setTimeout(() => {
-      menu.style.transform = 'scale(1)';
-      menu.style.opacity = '1';
-    }, 10);
-    hamburger.classList.add('is-active');
-    document.addEventListener('click', outsideClickListener);
-  }
-}
-
-function closeMenu() {
-  const menu = document.getElementById('navMenu');
-  const hamburger = document.querySelector('.hamburger');
-
-  if (menu.classList.contains('active')) {
-    menu.style.transformOrigin = 'top right';
-    menu.style.transform = 'scale(0)';
-    menu.style.opacity = '0';
-    hamburger.classList.remove('is-active');
-    setTimeout(() => {
-      menu.classList.remove('active');
-    }, 300);
-    document.removeEventListener('click', outsideClickListener);
-  }
-}
-
-function outsideClickListener(event) {
-  const menu = document.getElementById('navMenu');
-  const hamburger = document.querySelector('.hamburger');
-  if (!menu.contains(event.target) && !hamburger.contains(event.target)) {
-    closeMenu();
-  }
-}
-
-// NAFIGASI BARU
-function navigate(event, genre) {
-  event.preventDefault();
-  history.pushState({ genre: genre }, '', genre === 'all' ? '/beranda' : '/' + genre);
-  filterPosts(genre);
-}
-
-window.addEventListener('popstate', (event) => {
-  if (event.state && event.state.genre) {
-    filterPosts(event.state.genre, false);
-  } else {
-    filterPosts('all', false);
-  }
-});
-
-window.addEventListener('load', async () => {
-  let path = window.location.pathname.replace('/', '') || 'beranda';
-  let genre = path === 'beranda' ? 'all' : path;
-  await loadAllPosts();
-  filterPosts(genre, false);
-});
