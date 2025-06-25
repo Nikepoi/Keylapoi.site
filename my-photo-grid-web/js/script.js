@@ -1,4 +1,3 @@
-
 let posts = [];
 let filteredPosts = [];
 let currentPage = 1;
@@ -27,27 +26,30 @@ function hideLoader() {
 }
 
 async function loadAllPosts() {
-  showLoader();
-  posts.length = 0;
-  currentPage = 1;
+  return new Promise(async (resolve) => {
+    showLoader();
+    posts.length = 0;
+    currentPage = 1;
 
-  try {
-    const indexRes = await fetch('data/index.json');
-    const indexData = await indexRes.json();
+    try {
+      const indexRes = await fetch('data/index.json');
+      const indexData = await indexRes.json();
 
-    for (const entry of indexData) {
-      const filePath = `data/${entry.file}`;
-      const res = await fetch(filePath);
-      if (res.ok) {
-        const post = await res.json();
-        posts.push(post);
+      for (const entry of indexData) {
+        const filePath = `data/${entry.file}`;
+        const res = await fetch(filePath);
+        if (res.ok) {
+          const post = await res.json();
+          posts.push(post);
+        }
       }
+    } catch (err) {
+      console.error("Gagal load post:", err);
+    } finally {
+      hideLoader();
+      resolve(); // Pastikan semua file selesai load
     }
-  } catch (err) {
-    console.error("Gagal load post:", err);
-  } finally {
-    hideLoader();
-  }
+  });
 }
 
 function getCurrentPagePosts() {
@@ -252,6 +254,7 @@ window.addEventListener('hashchange', () => {
 
 window.addEventListener('load', async () => {
   let genre = window.location.hash.replace('#', '') || 'beranda';
-  await loadAllPosts();
+  await loadAllPosts(); // Pastikan semua post sudah selesai dibaca
+  filteredPosts = posts; // Pastikan semua post sudah terisi
   filterPosts(genre, false);
 });
