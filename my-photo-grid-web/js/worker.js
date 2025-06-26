@@ -1,4 +1,4 @@
-// Web Worker - Auto Check Update Tiap 20 Detik
+// Web Worker - Auto Check Update setiap 20 detik dan juga support refresh
 self.onmessage = function (e) {
   if (e.data === 'start') {
     setInterval(() => {
