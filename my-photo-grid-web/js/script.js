@@ -1,9 +1,7 @@
-let db;
 let posts = [];
 let filteredPosts = [];
 let currentPage = 1;
 const postsPerPage = 20;
-let worker;
 
 function decodeUrl(encodedUrl) {
   try {
@@ -19,36 +17,6 @@ function decodeUrl(encodedUrl) {
   }
 }
 
-function initDB() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open("PostsDatabase", 1);
-    request.onerror = () => reject('Gagal buka IndexedDB');
-    request.onsuccess = () => {
-      db = request.result;
-      resolve();
-    };
-    request.onupgradeneeded = (event) => {
-      db = event.target.result;
-      db.createObjectStore("posts", { keyPath: "id" });
-    };
-  });
-}
-
-function saveToDB(post) {
-  const transaction = db.transaction(["posts"], "readwrite");
-  const store = transaction.objectStore("posts");
-  store.put(post);
-}
-
-function loadFromDB() {
-  return new Promise((resolve) => {
-    const transaction = db.transaction(["posts"], "readonly");
-    const store = transaction.objectStore("posts");
-    const request = store.getAll();
-    request.onsuccess = () => resolve(request.result);
-  });
-}
-
 function showLoader() {
   document.getElementById('blur-loader').style.display = 'flex';
 }
@@ -57,19 +25,28 @@ function hideLoader() {
   document.getElementById('blur-loader').style.display = 'none';
 }
 
-function updateProgress(percent) {
-  document.getElementById('progressText').innerText = `${percent}%`;
-  document.getElementById('progressFill').style.width = `${percent}%`;
+function updateProgress(progress) {
+  document.getElementById('progressText').innerText = `${progress}%`;
 }
 
 async function loadAllPosts() {
   showLoader();
-  posts = [];
+  posts.length = 0;
   currentPage = 1;
 
   try {
-    const response = await fetch('data/index.json');
-    const indexData = await response.json();
+    const db = await openDB();
+    const cachedPosts = await getCachedPosts(db);
+
+    if (cachedPosts && cachedPosts.length) {
+      posts = cachedPosts;
+      hideLoader();
+      filterPosts(window.location.hash.replace('#', '') || 'beranda', false);
+      return;
+    }
+
+    const indexRes = await fetch('data/index.json', { cache: 'no-store' });
+    const indexData = await indexRes.json();
     let loadedCount = 0;
 
     for (let i = indexData.length - 1; i >= 0; i--) {
@@ -79,19 +56,17 @@ async function loadAllPosts() {
       if (res.ok) {
         const post = await res.json();
         posts.push(post);
-        saveToDB(post);
+        await savePost(db, post);
+        loadedCount++;
+        const progress = Math.floor((loadedCount / indexData.length) * 100);
+        updateProgress(progress);
       }
-      loadedCount++;
-      updateProgress(Math.round((loadedCount / indexData.length) * 100));
     }
-
-    hideLoader();
-    let genre = window.location.hash.replace('#', '') || 'beranda';
-    filterPosts(genre, false);
-
   } catch (err) {
     console.error("Gagal load post:", err);
+  } finally {
     hideLoader();
+    filterPosts(window.location.hash.replace('#', '') || 'beranda', false);
   }
 }
 
@@ -272,49 +247,91 @@ function outsideClickListener(event) {
   }
 }
 
-function updateContent() {
-  loadAllPosts();
-  document.getElementById('updateNotice').style.display = 'none';
+// IndexedDB Functions
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('KeylapoiDB', 1);
+    request.onerror = () => reject('Gagal buka database');
+    request.onsuccess = () => resolve(request.result);
+    request.onupgradeneeded = function (e) {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('posts')) {
+        db.createObjectStore('posts', { keyPath: 'id' });
+      }
+    };
+  });
 }
 
-async function checkUpdate() {
+function savePost(db, post) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('posts', 'readwrite');
+    const store = tx.objectStore('posts');
+    store.put(post);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject('Gagal simpan post');
+  });
+}
+
+function getCachedPosts(db) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('posts', 'readonly');
+    const store = tx.objectStore('posts');
+    const request = store.getAll();
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject('Gagal ambil post dari cache');
+  });
+}
+
+// Update Handler
+function updateContent() {
+  location.reload();
+}
+
+// Inisialisasi Web Worker
+const updateWorker = new Worker('js/worker.js');
+updateWorker.postMessage('start');
+
+updateWorker.onmessage = function (e) {
+  if (e.data === 'update') {
+    checkForUpdates();
+  }
+};
+
+// Fungsi cek update
+async function checkForUpdates() {
   try {
-    const response = await fetch('data/index.json', { cache: 'no-store' });
-    const indexData = await response.json();
-    if (indexData.length !== posts.length) {
+    const response = await fetch('data/index.json', { cache: "no-store" });
+    const newData = await response.json();
+    const newHash = JSON.stringify(newData).hashCode();
+
+    const oldHash = localStorage.getItem('indexHash');
+
+    if (newHash !== oldHash) {
       document.getElementById('updateNotice').style.display = 'block';
+      localStorage.setItem('indexHash', newHash);
     }
   } catch (err) {
-    console.error("Gagal cek update:", err);
+    console.error('Gagal cek update:', err);
   }
 }
 
-function initWorker() {
-  worker = new Worker('js/worker.js');
-  worker.postMessage('start');
-  worker.onmessage = (e) => {
-    if (e.data === 'update') {
-      checkUpdate();
-    }
-  };
-}
+// Hash function
+String.prototype.hashCode = function () {
+  var hash = 0, i, chr;
+  if (this.length === 0) return hash;
+  for (i = 0; i < this.length; i++) {
+    chr = this.charCodeAt(i);
+    hash = ((hash << 5) - hash) + chr;
+    hash |= 0;
+  }
+  return hash;
+};
 
+// Event listeners
 window.addEventListener('hashchange', () => {
-  let genre = window.location.hash.replace('#', '') || 'beranda';
-  filterPosts(genre, false);
+  filterPosts(window.location.hash.replace('#', '') || 'beranda', false);
 });
 
 window.addEventListener('load', async () => {
-  await initDB();
-  const cachedPosts = await loadFromDB();
-  if (cachedPosts.length > 0) {
-    posts = cachedPosts;
-    let genre = window.location.hash.replace('#', '') || 'beranda';
-    filterPosts(genre, false);
-    hideLoader();
-    loadAllPosts();
-  } else {
-    await loadAllPosts();
-  }
-  initWorker();
+  await loadAllPosts();
 });
