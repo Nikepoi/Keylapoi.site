@@ -2,6 +2,7 @@ let posts = [];
 let filteredPosts = [];
 let currentPage = 1;
 const postsPerPage = 20;
+let latestIndexLength = 0;
 
 function decodeUrl(encodedUrl) {
   try {
@@ -25,14 +26,30 @@ function hideLoader() {
   document.getElementById('blur-loader').style.display = 'none';
 }
 
+function showProgress() {
+  document.getElementById('download-progress').style.display = 'flex';
+}
+
+function hideProgress() {
+  document.getElementById('download-progress').style.display = 'none';
+}
+
+function updateProgress(value) {
+  const progressBar = document.getElementById('progressBar');
+  const progressText = document.getElementById('progressText');
+  progressBar.style.width = `${value}%`;
+  progressText.textContent = `${value}%`;
+}
+
 async function loadAllPosts() {
-  showLoader();
+  showProgress();
   posts.length = 0;
   currentPage = 1;
 
   try {
     const indexRes = await fetch('data/index.json');
     const indexData = await indexRes.json();
+    latestIndexLength = indexData.length;
 
     for (let i = indexData.length - 1; i >= 0; i--) {
       const entry = indexData[i];
@@ -41,13 +58,15 @@ async function loadAllPosts() {
       if (res.ok) {
         const post = await res.json();
         posts.push(post);
+        let progress = Math.round(((indexData.length - i) / indexData.length) * 100);
+        updateProgress(progress);
       }
     }
 
   } catch (err) {
     console.error("Gagal load post:", err);
   } finally {
-    hideLoader();
+    hideProgress();
     let genre = window.location.hash.replace('#', '') || 'beranda';
     filterPosts(genre, false);
   }
@@ -229,6 +248,26 @@ function outsideClickListener(event) {
     closeMenu();
   }
 }
+
+async function checkForUpdates() {
+  try {
+    const indexRes = await fetch('data/index.json');
+    const indexData = await indexRes.json();
+
+    if (indexData.length > latestIndexLength) {
+      document.getElementById('update-notification').style.display = 'block';
+    }
+  } catch (err) {
+    console.error("Gagal cek update:", err);
+  }
+}
+
+function updatePosts() {
+  document.getElementById('update-notification').style.display = 'none';
+  loadAllPosts();
+}
+
+setInterval(checkForUpdates, 60000); // Cek setiap 1 menit
 
 window.addEventListener('hashchange', () => {
   let genre = window.location.hash.replace('#', '') || 'beranda';
