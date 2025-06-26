@@ -1,8 +1,8 @@
-// Web Worker - Auto Check Update setiap 20 detik dan juga support refresh
-self.onmessage = function (e) {
-  if (e.data === 'start') {
-    setInterval(() => {
-      self.postMessage('update');
-    }, 20000); // Cek update setiap 20 detik
+const updateWorker = new Worker('js/worker.js');
+updateWorker.postMessage('start');
+
+updateWorker.onmessage = function (e) {
+  if (e.data === 'update') {
+    checkForUpdates();
   }
 };
