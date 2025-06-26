@@ -1,8 +1,6 @@
-// Versi Lengkap Multi Index Aman, Tidak Error
+// Versi Full Multi Index dengan Genre Filter Berfungsi
 
-let posts = []; let filteredPosts = []; let currentIndexPage = 1; const postsPerPage = 20;
-
-let maxIndexPage = 1; // Nanti ini otomatis terdeteksi
+let posts = []; let filteredPosts = []; let currentPage = 1; const postsPerPage = 20; let currentIndexPage = 1; let maxIndexPage = 1; let currentGenre = 'all';
 
 async function getMaxIndexPage() { try { let i = 1; while (true) { const res = await fetch(data/index${i}.json); if (!res.ok) break; i++; } maxIndexPage = i - 1; } catch (e) { console.error('Gagal cek jumlah index', e); } }
 
@@ -12,11 +10,12 @@ function showLoader() { document.getElementById('blur-loader').style.display = '
 
 function hideLoader() { document.getElementById('blur-loader').style.display = 'none'; }
 
-async function loadIndexPage(indexPage = 1) { showLoader(); try { const indexRes = await fetch(data/index${indexPage}.json); if (!indexRes.ok) throw new Error('Index file not found');
+async function loadIndexPage(indexPage = 1) { showLoader(); posts = [];
+
+try { const indexRes = await fetch(data/index${indexPage}.json); if (!indexRes.ok) throw new Error('Index file not found');
 
 const indexData = await indexRes.json();
 
-posts = [];
 for (let i = indexData.length - 1; i >= 0; i--) {
   const entry = indexData[i];
   const filePath = `data/${entry.file}`;
@@ -27,13 +26,11 @@ for (let i = indexData.length - 1; i >= 0; i--) {
   }
 }
 
-filteredPosts = posts;
-displayPosts(getCurrentPagePosts());
-updatePagination();
+filterPosts(currentGenre, false);
 
 } catch (err) { console.error("Gagal load post:", err); alert('Halaman tidak ditemukan!'); if (currentIndexPage > 1) currentIndexPage--; } finally { hideLoader(); } }
 
-function getCurrentPagePosts() { return filteredPosts.slice(0, postsPerPage); }
+function getCurrentPagePosts() { const start = (currentPage - 1) * postsPerPage; const end = start + postsPerPage; return filteredPosts.slice(start, end); }
 
 function displayPosts(postsToShow) { const gridContainer = document.getElementById('postGrid'); gridContainer.innerHTML = '';
 
@@ -66,11 +63,39 @@ content.innerHTML = html; overlay.style.display = "flex"; }
 
 function closeOverlay(event) { if (event.target.id === "overlay" || event.target.classList.contains("close-btn")) { document.getElementById('overlay').style.display = "none"; } }
 
-function updatePagination() { document.getElementById('prevBtn').style.display = currentIndexPage > 1 ? 'inline-block' : 'none'; document.getElementById('nextBtn').style.display = currentIndexPage < maxIndexPage ? 'inline-block' : 'none'; }
+function updatePagination() { const totalPages = Math.ceil(filteredPosts.length / postsPerPage); document.getElementById('prevBtn').style.display = currentPage > 1 ? 'inline-block' : 'none'; document.getElementById('nextBtn').style.display = currentPage < totalPages ? 'inline-block' : 'none'; document.getElementById('prevIndexBtn').style.display = currentIndexPage > 1 ? 'inline-block' : 'none'; document.getElementById('nextIndexBtn').style.display = currentIndexPage < maxIndexPage ? 'inline-block' : 'none'; }
 
-function nextPage() { if (currentIndexPage < maxIndexPage) { currentIndexPage++; loadIndexPage(currentIndexPage); } }
+function setActiveMenu(genre) { const menuLinks = document.querySelectorAll('.nav-menu li a'); menuLinks.forEach(link => { link.classList.remove('active-genre'); if (link.getAttribute('href') === #${genre}) { link.classList.add('active-genre'); } }); }
 
-function prevPage() { if (currentIndexPage > 1) { currentIndexPage--; loadIndexPage(currentIndexPage); } }
+function filterPosts(genre, save = true) { showLoader(); setTimeout(() => { currentPage = 1; currentGenre = genre;
+
+if (genre === 'all' || genre === 'beranda') {
+  filteredPosts = posts;
+} else {
+  filteredPosts = posts.filter(post => post.genre && post.genre.toLowerCase() === genre.toLowerCase());
+}
+
+displayPosts(getCurrentPagePosts());
+updatePagination();
+hideLoader();
+
+if (save) {
+  window.location.hash = genre === 'all' ? 'beranda' : genre;
+}
+
+setActiveMenu(genre);
+closeMenu();
+scrollToTop();
+
+}, 300); }
+
+function nextPage() { showLoader(); setTimeout(() => { const totalPages = Math.ceil(filteredPosts.length / postsPerPage); if (currentPage < totalPages) { currentPage++; displayPosts(getCurrentPagePosts()); updatePagination(); scrollToTop(); } hideLoader(); }, 300); }
+
+function prevPage() { showLoader(); setTimeout(() => { if (currentPage > 1) { currentPage--; displayPosts(getCurrentPagePosts()); updatePagination(); scrollToTop(); } hideLoader(); }, 300); }
+
+function nextIndexPage() { if (currentIndexPage < maxIndexPage) { currentIndexPage++; loadIndexPage(currentIndexPage); } }
+
+function prevIndexPage() { if (currentIndexPage > 1) { currentIndexPage--; loadIndexPage(currentIndexPage); } }
 
 function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
 
@@ -86,5 +111,7 @@ function outsideClickListener(event) { const menu = document.getElementById('nav
 
 window.addEventListener('hashchange', () => { let genre = window.location.hash.replace('#', '') || 'beranda'; filterPosts(genre, false); });
 
-window.addEventListener('load', async () => { await getMaxIndexPage(); await loadIndexPage(currentIndexPage); let genre = window.location.hash.replace('#', '') || 'beranda'; filterPosts(genre, false); });
+window.addEventListener('load', async () => { await getMaxIndexPage(); await loadIndexPage(currentIndexPage);
+
+let genre = window.location.hash.replace('#', '') || 'beranda'; filterPosts(genre, false); });
 
