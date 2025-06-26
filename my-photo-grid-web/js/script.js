@@ -35,22 +35,31 @@ async function loadAllPosts() {
   currentPage = 1;
 
   try {
+    const indexRes = await fetch('data/index.json', { cache: 'no-store' });
+    const indexData = await indexRes.json();
+    const lastModified = indexData.lastModified;
+
     const db = await openDB();
+    const cachedVersion = localStorage.getItem('indexVersion');
+
+    if (cachedVersion !== lastModified) {
+      await clearCache(db);
+      localStorage.setItem('indexVersion', lastModified);
+    }
+
     const cachedPosts = await getCachedPosts(db);
 
     if (cachedPosts && cachedPosts.length) {
-      posts = cachedPosts.sort((a, b) => b.id - a.id); // Urutan terbaru di atas
+      posts = cachedPosts;
       hideLoader();
       filterPosts(window.location.hash.replace('#', '') || 'beranda', false);
       return;
     }
 
-    const indexRes = await fetch('data/index.json', { cache: 'no-store' });
-    const indexData = await indexRes.json();
     let loadedCount = 0;
 
-    for (let i = indexData.length - 1; i >= 0; i--) {
-      const entry = indexData[i];
+    for (let i = indexData.files.length - 1; i >= 0; i--) {
+      const entry = indexData.files[i];
       const filePath = `data/${entry.file}`;
       const res = await fetch(filePath);
       if (res.ok) {
@@ -58,13 +67,10 @@ async function loadAllPosts() {
         posts.push(post);
         await savePost(db, post);
         loadedCount++;
-        const progress = Math.floor((loadedCount / indexData.length) * 100);
+        const progress = Math.floor((loadedCount / indexData.files.length) * 100);
         updateProgress(progress);
       }
     }
-
-    posts.sort((a, b) => b.id - a.id); // Urutan terbaru di atas
-
   } catch (err) {
     console.error("Gagal load post:", err);
   } finally {
@@ -285,12 +291,22 @@ function getCachedPosts(db) {
   });
 }
 
+function clearCache(db) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('posts', 'readwrite');
+    const store = tx.objectStore('posts');
+    const request = store.clear();
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject('Gagal hapus cache');
+  });
+}
+
 // Update Handler
 function updateContent() {
   location.reload();
 }
 
-// Inisialisasi Web Worker
+// Web Worker
 const updateWorker = new Worker('js/worker.js');
 updateWorker.postMessage('start');
 
@@ -300,25 +316,24 @@ updateWorker.onmessage = function (e) {
   }
 };
 
-// Fungsi cek update dengan lastModified
+// Cek Update
 async function checkForUpdates() {
   try {
     const response = await fetch('data/index.json', { cache: "no-store" });
-    const newData = await response.json();
+    const indexData = await response.json();
+    const newVersion = indexData.lastModified;
 
-    const newLatest = newData[newData.length - 1]?.lastModified;
-    const oldLatest = localStorage.getItem('lastModified');
+    const oldVersion = localStorage.getItem('indexVersion');
 
-    if (newLatest && newLatest !== oldLatest) {
+    if (newVersion !== oldVersion) {
       document.getElementById('updateNotice').style.display = 'block';
-      localStorage.setItem('lastModified', newLatest);
     }
   } catch (err) {
     console.error('Gagal cek update:', err);
   }
 }
 
-// Event listeners
+// Event Listeners
 window.addEventListener('hashchange', () => {
   filterPosts(window.location.hash.replace('#', '') || 'beranda', false);
 });
