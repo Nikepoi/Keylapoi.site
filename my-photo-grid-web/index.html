@@ -33,10 +33,6 @@
     </ul>
   </nav>
 
-  <div id="update-notification" style="display:none;" class="update-notif">
-    Konten baru tersedia. <button onclick="updatePosts()">Update Sekarang</button>
-  </div>
-
   <main class="grid-container" id="postGrid"></main>
 
   <div class="pagination">
@@ -50,12 +46,12 @@
   </div>
 
   <div id="blur-loader" class="blur-loader" style="display: none;">
-    <span class="loading-dots"></span>
+    <div class="spinner"></div>
+    <div class="progress-text" id="progressText">0%</div>
   </div>
 
-  <div id="download-progress" class="progress-container" style="display: none;">
-    <div class="progress-bar" id="progressBar"></div>
-    <span id="progressText">0%</span>
+  <div id="updateNotice" style="display:none; position:fixed; top:80px; right:20px; background:#333; color:#fff; padding:10px 20px; border-radius:8px; cursor:pointer; z-index:1000; box-shadow:0 2px 5px rgba(0,0,0,0.3);" onclick="updateContent()">
+    🔄 Konten Baru Tersedia - Klik untuk Update
   </div>
 
   <footer class="site-footer">
@@ -65,4 +61,4 @@
   <script src="js/script.js"></script>
 </body>
 
-                            </html>
+</html>
