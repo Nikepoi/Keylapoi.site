@@ -39,7 +39,7 @@ async function loadAllPosts() {
     const cachedPosts = await getCachedPosts(db);
 
     if (cachedPosts && cachedPosts.length) {
-      posts = cachedPosts;
+      posts = cachedPosts.sort((a, b) => b.id - a.id); // Urutan terbaru di atas
       hideLoader();
       filterPosts(window.location.hash.replace('#', '') || 'beranda', false);
       return;
@@ -49,7 +49,7 @@ async function loadAllPosts() {
     const indexData = await indexRes.json();
     let loadedCount = 0;
 
-    for (let i = 0; i < indexData.length; i++) { // load dari atas
+    for (let i = indexData.length - 1; i >= 0; i--) {
       const entry = indexData[i];
       const filePath = `data/${entry.file}`;
       const res = await fetch(filePath);
@@ -62,6 +62,9 @@ async function loadAllPosts() {
         updateProgress(progress);
       }
     }
+
+    posts.sort((a, b) => b.id - a.id); // Urutan terbaru di atas
+
   } catch (err) {
     console.error("Gagal load post:", err);
   } finally {
@@ -282,6 +285,7 @@ function getCachedPosts(db) {
   });
 }
 
+// Update Handler
 function updateContent() {
   location.reload();
 }
@@ -296,22 +300,25 @@ updateWorker.onmessage = function (e) {
   }
 };
 
-// Cek update pakai lastModified
+// Fungsi cek update dengan lastModified
 async function checkForUpdates() {
   try {
-    const response = await fetch('data/index.json', { method: 'HEAD', cache: 'no-store' });
-    const serverTime = response.headers.get('last-modified');
-    const localTime = localStorage.getItem('indexLastModified');
+    const response = await fetch('data/index.json', { cache: "no-store" });
+    const newData = await response.json();
 
-    if (serverTime !== localTime) {
+    const newLatest = newData[newData.length - 1]?.lastModified;
+    const oldLatest = localStorage.getItem('lastModified');
+
+    if (newLatest && newLatest !== oldLatest) {
       document.getElementById('updateNotice').style.display = 'block';
-      localStorage.setItem('indexLastModified', serverTime);
+      localStorage.setItem('lastModified', newLatest);
     }
   } catch (err) {
     console.error('Gagal cek update:', err);
   }
 }
 
+// Event listeners
 window.addEventListener('hashchange', () => {
   filterPosts(window.location.hash.replace('#', '') || 'beranda', false);
 });
