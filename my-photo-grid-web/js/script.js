@@ -51,6 +51,7 @@ async function loadAllPosts() {
 
     if (cachedPosts && cachedPosts.length) {
       posts = cachedPosts;
+      posts.sort((a, b) => new Date(b.date) - new Date(a.date));
       hideLoader();
       filterPosts(window.location.hash.replace('#', '') || 'beranda', false);
       return;
@@ -71,6 +72,8 @@ async function loadAllPosts() {
         updateProgress(progress);
       }
     }
+
+    posts.sort((a, b) => new Date(b.date) - new Date(a.date));
   } catch (err) {
     console.error("Gagal load post:", err);
   } finally {
