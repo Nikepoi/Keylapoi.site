@@ -33,6 +33,10 @@
     </ul>
   </nav>
 
+  <div id="update-notification" style="display:none;" class="update-notif">
+    Konten baru tersedia. <button onclick="updatePosts()">Update Sekarang</button>
+  </div>
+
   <main class="grid-container" id="postGrid"></main>
 
   <div class="pagination">
@@ -49,6 +53,11 @@
     <span class="loading-dots"></span>
   </div>
 
+  <div id="download-progress" class="progress-container" style="display: none;">
+    <div class="progress-bar" id="progressBar"></div>
+    <span id="progressText">0%</span>
+  </div>
+
   <footer class="site-footer">
     <p>&copy; 2025 Keylapoi. All rights reserved.</p>
   </footer>
@@ -56,4 +65,4 @@
   <script src="js/script.js"></script>
 </body>
 
-    </html>
+                            </html>
