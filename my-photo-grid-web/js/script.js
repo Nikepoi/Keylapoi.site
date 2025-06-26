@@ -34,7 +34,6 @@ async function loadAllPosts() {
     const indexRes = await fetch('data/index.json');
     const indexData = await indexRes.json();
 
-    // Baca dari bawah biar terbaru di atas
     for (let i = indexData.length - 1; i >= 0; i--) {
       const entry = indexData[i];
       const filePath = `data/${entry.file}`;
@@ -44,6 +43,10 @@ async function loadAllPosts() {
         posts.push(post);
       }
     }
+
+    // Data sudah dimuat, langsung render
+    let genre = window.location.hash.replace('#', '') || 'beranda';
+    filterPosts(genre, false);
 
   } catch (err) {
     console.error("Gagal load post:", err);
@@ -253,7 +256,5 @@ window.addEventListener('hashchange', () => {
 });
 
 window.addEventListener('load', async () => {
-  let genre = window.location.hash.replace('#', '') || 'beranda';
-  await loadAllPosts();
-  filterPosts(genre, false);
+  await loadAllPosts(); // Auto render setelah load
 });
