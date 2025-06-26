@@ -1,6 +1,6 @@
 {
-  "lastModified": "2025-06-26T15:30:00Z",
-  "posts": [
+  "lastModified": "2025-06-26T15:00:00Z",
+  "files": [
     { "file": "local/jessica.json" },
     { "file": "local/hijabmalai.json" },
     { "file": "local/manda_hijab.json" },
@@ -98,4 +98,4 @@
     { "file": "local/aurel.json" },
     { "file": "local/jeva.json" }
   ]
-}
+    }
