@@ -49,7 +49,7 @@ async function loadAllPosts() {
     const indexData = await indexRes.json();
     let loadedCount = 0;
 
-    for (let i = indexData.length - 1; i >= 0; i--) {
+    for (let i = 0; i < indexData.length; i++) { // load dari atas
       const entry = indexData[i];
       const filePath = `data/${entry.file}`;
       const res = await fetch(filePath);
@@ -282,7 +282,6 @@ function getCachedPosts(db) {
   });
 }
 
-// Update Handler
 function updateContent() {
   location.reload();
 }
@@ -297,37 +296,22 @@ updateWorker.onmessage = function (e) {
   }
 };
 
-// Fungsi cek update
+// Cek update pakai lastModified
 async function checkForUpdates() {
   try {
-    const response = await fetch('data/index.json', { cache: "no-store" });
-    const newData = await response.json();
-    const newHash = JSON.stringify(newData).hashCode();
+    const response = await fetch('data/index.json', { method: 'HEAD', cache: 'no-store' });
+    const serverTime = response.headers.get('last-modified');
+    const localTime = localStorage.getItem('indexLastModified');
 
-    const oldHash = localStorage.getItem('indexHash');
-
-    if (newHash !== oldHash) {
+    if (serverTime !== localTime) {
       document.getElementById('updateNotice').style.display = 'block';
-      localStorage.setItem('indexHash', newHash);
+      localStorage.setItem('indexLastModified', serverTime);
     }
   } catch (err) {
     console.error('Gagal cek update:', err);
   }
 }
 
-// Hash function
-String.prototype.hashCode = function () {
-  var hash = 0, i, chr;
-  if (this.length === 0) return hash;
-  for (i = 0; i < this.length; i++) {
-    chr = this.charCodeAt(i);
-    hash = ((hash << 5) - hash) + chr;
-    hash |= 0;
-  }
-  return hash;
-};
-
-// Event listeners
 window.addEventListener('hashchange', () => {
   filterPosts(window.location.hash.replace('#', '') || 'beranda', false);
 });
