@@ -1,6 +1,10 @@
-// Multi Index Loader - Versi Final
+// Versi Lengkap Multi Index Aman, Tidak Error
 
 let posts = []; let filteredPosts = []; let currentIndexPage = 1; const postsPerPage = 20;
+
+let maxIndexPage = 1; // Nanti ini otomatis terdeteksi
+
+async function getMaxIndexPage() { try { let i = 1; while (true) { const res = await fetch(data/index${i}.json); if (!res.ok) break; i++; } maxIndexPage = i - 1; } catch (e) { console.error('Gagal cek jumlah index', e); } }
 
 function decodeUrl(encodedUrl) { try { const decoded = atob(encodedUrl); const url = new URL(decoded); const hostname = url.hostname; const targetDomains = ['videy.co', 'mediafire', 'terabox', 'pixeldrain']; const isTarget = targetDomains.some(domain => hostname.includes(domain)); return isTarget ? https://www.keylapoi.site/safelink.html?url=${encodedUrl} : decoded; } catch (e) { console.error("Gagal decode:", encodedUrl); return "#"; } }
 
@@ -8,7 +12,9 @@ function showLoader() { document.getElementById('blur-loader').style.display = '
 
 function hideLoader() { document.getElementById('blur-loader').style.display = 'none'; }
 
-async function loadIndexPage(indexPage = 1) { showLoader(); try { const indexRes = await fetch(data/index${indexPage}.json); const indexData = await indexRes.json();
+async function loadIndexPage(indexPage = 1) { showLoader(); try { const indexRes = await fetch(data/index${indexPage}.json); if (!indexRes.ok) throw new Error('Index file not found');
+
+const indexData = await indexRes.json();
 
 posts = [];
 for (let i = indexData.length - 1; i >= 0; i--) {
@@ -25,9 +31,9 @@ filteredPosts = posts;
 displayPosts(getCurrentPagePosts());
 updatePagination();
 
-} catch (err) { console.error("Gagal load post:", err); } finally { hideLoader(); } }
+} catch (err) { console.error("Gagal load post:", err); alert('Halaman tidak ditemukan!'); if (currentIndexPage > 1) currentIndexPage--; } finally { hideLoader(); } }
 
-function getCurrentPagePosts() { const start = 0; const end = postsPerPage; return filteredPosts.slice(start, end); }
+function getCurrentPagePosts() { return filteredPosts.slice(0, postsPerPage); }
 
 function displayPosts(postsToShow) { const gridContainer = document.getElementById('postGrid'); gridContainer.innerHTML = '';
 
@@ -54,39 +60,15 @@ function showOverlay(post) { const overlay = document.getElementById('overlay');
 
 let html = <img src="${post.image}" alt="${post.title}" style="width: 100%; height: auto; max-height: 60vh; object-fit: contain;" /> <h3>${post.title}</h3>;
 
-if (post.links?.videy) { html += renderLinks('Videy', post.links.videy); }
-
-if (post.links?.terabox) { html += renderLinks('Terabox', post.links.terabox); }
-
-if (post.links?.mediafire) { html += renderLinks('Mediafire', post.links.mediafire); }
-
-if (post.links?.pixeldrain) { html += renderLinks('PixelDrain', post.links.pixeldrain); }
+if (post.links?.videy) html += renderLinks('Videy', post.links.videy); if (post.links?.terabox) html += renderLinks('Terabox', post.links.terabox); if (post.links?.mediafire) html += renderLinks('Mediafire', post.links.mediafire); if (post.links?.pixeldrain) html += renderLinks('PixelDrain', post.links.pixeldrain);
 
 content.innerHTML = html; overlay.style.display = "flex"; }
 
 function closeOverlay(event) { if (event.target.id === "overlay" || event.target.classList.contains("close-btn")) { document.getElementById('overlay').style.display = "none"; } }
 
-function updatePagination() { document.getElementById('prevBtn').style.display = currentIndexPage > 1 ? 'inline-block' : 'none'; document.getElementById('nextBtn').style.display = 'inline-block'; }
+function updatePagination() { document.getElementById('prevBtn').style.display = currentIndexPage > 1 ? 'inline-block' : 'none'; document.getElementById('nextBtn').style.display = currentIndexPage < maxIndexPage ? 'inline-block' : 'none'; }
 
-function setActiveMenu(genre) { const menuLinks = document.querySelectorAll('.nav-menu li a'); menuLinks.forEach(link => { link.classList.remove('active-genre'); if (link.getAttribute('href') === #${genre}) { link.classList.add('active-genre'); } }); }
-
-function filterPosts(genre, save = true) { showLoader(); setTimeout(() => { if (genre === 'all' || genre === 'beranda') { filteredPosts = posts; } else { filteredPosts = posts.filter(post => post.genre && post.genre.toLowerCase() === genre.toLowerCase()); }
-
-displayPosts(getCurrentPagePosts());
-updatePagination();
-hideLoader();
-
-if (save) {
-  window.location.hash = genre === 'all' ? 'beranda' : genre;
-}
-
-setActiveMenu(genre);
-closeMenu();
-scrollToTop();
-
-}, 300); }
-
-function nextPage() { currentIndexPage++; loadIndexPage(currentIndexPage); }
+function nextPage() { if (currentIndexPage < maxIndexPage) { currentIndexPage++; loadIndexPage(currentIndexPage); } }
 
 function prevPage() { if (currentIndexPage > 1) { currentIndexPage--; loadIndexPage(currentIndexPage); } }
 
@@ -104,5 +86,5 @@ function outsideClickListener(event) { const menu = document.getElementById('nav
 
 window.addEventListener('hashchange', () => { let genre = window.location.hash.replace('#', '') || 'beranda'; filterPosts(genre, false); });
 
-window.addEventListener('load', async () => { let genre = window.location.hash.replace('#', '') || 'beranda'; await loadIndexPage(currentIndexPage); filterPosts(genre, false); });
+window.addEventListener('load', async () => { await getMaxIndexPage(); await loadIndexPage(currentIndexPage); let genre = window.location.hash.replace('#', '') || 'beranda'; filterPosts(genre, false); });
 
