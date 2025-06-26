@@ -2,7 +2,7 @@ let posts = [];
 let filteredPosts = [];
 let currentPage = 1;
 const postsPerPage = 20;
-let latestIndexLength = 0;
+let currentIndex = [];
 
 function decodeUrl(encodedUrl) {
   try {
@@ -18,39 +18,65 @@ function decodeUrl(encodedUrl) {
   }
 }
 
-function showLoader() {
+function showLoader(progress = 0) {
   document.getElementById('blur-loader').style.display = 'flex';
+  document.getElementById('progressText').innerText = `${progress}%`;
 }
 
 function hideLoader() {
   document.getElementById('blur-loader').style.display = 'none';
 }
 
-function showProgress() {
-  document.getElementById('download-progress').style.display = 'flex';
+async function fetchIndex() {
+  try {
+    const res = await fetch('data/index.json', { cache: "no-store" });
+    return await res.json();
+  } catch (err) {
+    console.error("Gagal load index.json:", err);
+    return [];
+  }
 }
 
-function hideProgress() {
-  document.getElementById('download-progress').style.display = 'none';
+async function checkForUpdates() {
+  try {
+    const newIndex = await fetchIndex();
+    const storedIndex = JSON.parse(localStorage.getItem('indexData')) || [];
+
+    if (JSON.stringify(newIndex) !== JSON.stringify(storedIndex)) {
+      document.getElementById('updateNotice').style.display = 'block';
+    }
+  } catch (err) {
+    console.error('Gagal cek update:', err);
+  }
 }
 
-function updateProgress(value) {
-  const progressBar = document.getElementById('progressBar');
-  const progressText = document.getElementById('progressText');
-  progressBar.style.width = `${value}%`;
-  progressText.textContent = `${value}%`;
+function saveIndexLocally(indexData) {
+  localStorage.setItem('indexData', JSON.stringify(indexData));
 }
 
-async function loadAllPosts() {
-  showProgress();
+async function updateContent() {
+  document.getElementById('updateNotice').style.display = 'none';
+  await loadAllPosts(true);
+}
+
+async function loadAllPosts(forceUpdate = false) {
+  showLoader(0);
   posts.length = 0;
   currentPage = 1;
 
   try {
-    const indexRes = await fetch('data/index.json');
-    const indexData = await indexRes.json();
-    latestIndexLength = indexData.length;
+    let indexData = [];
 
+    if (!forceUpdate && localStorage.getItem('indexData')) {
+      indexData = JSON.parse(localStorage.getItem('indexData'));
+    } else {
+      indexData = await fetchIndex();
+      saveIndexLocally(indexData);
+    }
+
+    currentIndex = indexData;
+
+    let loaded = 0;
     for (let i = indexData.length - 1; i >= 0; i--) {
       const entry = indexData[i];
       const filePath = `data/${entry.file}`;
@@ -58,15 +84,15 @@ async function loadAllPosts() {
       if (res.ok) {
         const post = await res.json();
         posts.push(post);
-        let progress = Math.round(((indexData.length - i) / indexData.length) * 100);
-        updateProgress(progress);
       }
+      loaded++;
+      showLoader(Math.floor((loaded / indexData.length) * 100));
     }
 
   } catch (err) {
     console.error("Gagal load post:", err);
   } finally {
-    hideProgress();
+    hideLoader();
     let genre = window.location.hash.replace('#', '') || 'beranda';
     filterPosts(genre, false);
   }
@@ -249,26 +275,6 @@ function outsideClickListener(event) {
   }
 }
 
-async function checkForUpdates() {
-  try {
-    const indexRes = await fetch('data/index.json');
-    const indexData = await indexRes.json();
-
-    if (indexData.length > latestIndexLength) {
-      document.getElementById('update-notification').style.display = 'block';
-    }
-  } catch (err) {
-    console.error("Gagal cek update:", err);
-  }
-}
-
-function updatePosts() {
-  document.getElementById('update-notification').style.display = 'none';
-  loadAllPosts();
-}
-
-setInterval(checkForUpdates, 60000); // Cek setiap 1 menit
-
 window.addEventListener('hashchange', () => {
   let genre = window.location.hash.replace('#', '') || 'beranda';
   filterPosts(genre, false);
@@ -276,4 +282,5 @@ window.addEventListener('hashchange', () => {
 
 window.addEventListener('load', async () => {
   await loadAllPosts();
+  setInterval(checkForUpdates, 60000); // cek update tiap 1 menit
 });
