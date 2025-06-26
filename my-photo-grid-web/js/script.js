@@ -1,8 +1,9 @@
+let db;
 let posts = [];
 let filteredPosts = [];
 let currentPage = 1;
 const postsPerPage = 20;
-let currentIndex = [];
+let worker;
 
 function decodeUrl(encodedUrl) {
   try {
@@ -18,65 +19,59 @@ function decodeUrl(encodedUrl) {
   }
 }
 
-function showLoader(progress = 0) {
+function initDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open("PostsDatabase", 1);
+    request.onerror = () => reject('Gagal buka IndexedDB');
+    request.onsuccess = () => {
+      db = request.result;
+      resolve();
+    };
+    request.onupgradeneeded = (event) => {
+      db = event.target.result;
+      db.createObjectStore("posts", { keyPath: "id" });
+    };
+  });
+}
+
+function saveToDB(post) {
+  const transaction = db.transaction(["posts"], "readwrite");
+  const store = transaction.objectStore("posts");
+  store.put(post);
+}
+
+function loadFromDB() {
+  return new Promise((resolve) => {
+    const transaction = db.transaction(["posts"], "readonly");
+    const store = transaction.objectStore("posts");
+    const request = store.getAll();
+    request.onsuccess = () => resolve(request.result);
+  });
+}
+
+function showLoader() {
   document.getElementById('blur-loader').style.display = 'flex';
-  document.getElementById('progressText').innerText = `${progress}%`;
 }
 
 function hideLoader() {
   document.getElementById('blur-loader').style.display = 'none';
 }
 
-async function fetchIndex() {
-  try {
-    const res = await fetch('data/index.json', { cache: "no-store" });
-    return await res.json();
-  } catch (err) {
-    console.error("Gagal load index.json:", err);
-    return [];
-  }
+function updateProgress(percent) {
+  document.getElementById('progressText').innerText = `${percent}%`;
+  document.getElementById('progressFill').style.width = `${percent}%`;
 }
 
-async function checkForUpdates() {
-  try {
-    const newIndex = await fetchIndex();
-    const storedIndex = JSON.parse(localStorage.getItem('indexData')) || [];
-
-    if (JSON.stringify(newIndex) !== JSON.stringify(storedIndex)) {
-      document.getElementById('updateNotice').style.display = 'block';
-    }
-  } catch (err) {
-    console.error('Gagal cek update:', err);
-  }
-}
-
-function saveIndexLocally(indexData) {
-  localStorage.setItem('indexData', JSON.stringify(indexData));
-}
-
-async function updateContent() {
-  document.getElementById('updateNotice').style.display = 'none';
-  await loadAllPosts(true);
-}
-
-async function loadAllPosts(forceUpdate = false) {
-  showLoader(0);
-  posts.length = 0;
+async function loadAllPosts() {
+  showLoader();
+  posts = [];
   currentPage = 1;
 
   try {
-    let indexData = [];
+    const response = await fetch('data/index.json');
+    const indexData = await response.json();
+    let loadedCount = 0;
 
-    if (!forceUpdate && localStorage.getItem('indexData')) {
-      indexData = JSON.parse(localStorage.getItem('indexData'));
-    } else {
-      indexData = await fetchIndex();
-      saveIndexLocally(indexData);
-    }
-
-    currentIndex = indexData;
-
-    let loaded = 0;
     for (let i = indexData.length - 1; i >= 0; i--) {
       const entry = indexData[i];
       const filePath = `data/${entry.file}`;
@@ -84,17 +79,19 @@ async function loadAllPosts(forceUpdate = false) {
       if (res.ok) {
         const post = await res.json();
         posts.push(post);
+        saveToDB(post);
       }
-      loaded++;
-      showLoader(Math.floor((loaded / indexData.length) * 100));
+      loadedCount++;
+      updateProgress(Math.round((loadedCount / indexData.length) * 100));
     }
 
-  } catch (err) {
-    console.error("Gagal load post:", err);
-  } finally {
     hideLoader();
     let genre = window.location.hash.replace('#', '') || 'beranda';
     filterPosts(genre, false);
+
+  } catch (err) {
+    console.error("Gagal load post:", err);
+    hideLoader();
   }
 }
 
@@ -275,12 +272,49 @@ function outsideClickListener(event) {
   }
 }
 
+function updateContent() {
+  loadAllPosts();
+  document.getElementById('updateNotice').style.display = 'none';
+}
+
+async function checkUpdate() {
+  try {
+    const response = await fetch('data/index.json', { cache: 'no-store' });
+    const indexData = await response.json();
+    if (indexData.length !== posts.length) {
+      document.getElementById('updateNotice').style.display = 'block';
+    }
+  } catch (err) {
+    console.error("Gagal cek update:", err);
+  }
+}
+
+function initWorker() {
+  worker = new Worker('js/worker.js');
+  worker.postMessage('start');
+  worker.onmessage = (e) => {
+    if (e.data === 'update') {
+      checkUpdate();
+    }
+  };
+}
+
 window.addEventListener('hashchange', () => {
   let genre = window.location.hash.replace('#', '') || 'beranda';
   filterPosts(genre, false);
 });
 
 window.addEventListener('load', async () => {
-  await loadAllPosts();
-  setInterval(checkForUpdates, 60000); // cek update tiap 1 menit
+  await initDB();
+  const cachedPosts = await loadFromDB();
+  if (cachedPosts.length > 0) {
+    posts = cachedPosts;
+    let genre = window.location.hash.replace('#', '') || 'beranda';
+    filterPosts(genre, false);
+    hideLoader();
+    loadAllPosts();
+  } else {
+    await loadAllPosts();
+  }
+  initWorker();
 });
