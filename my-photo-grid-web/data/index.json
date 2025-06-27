@@ -109,6 +109,7 @@
     { "file": "local/ciaboba.json", "version": "1" },
     { "file": "asia/hyynmii.json", "version": "1" },
     { "file": "asia/cocopie.json", "version": "1" },
-    { "file": "local/pecita.json", "version": "1" }
+    { "file": "local/pecita.json", "version": "1" },
+    { "file": "local/inka.json", "version": "1" }
   ]
     }
