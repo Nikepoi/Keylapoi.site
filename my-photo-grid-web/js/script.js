@@ -309,6 +309,11 @@ function updateContent() {
   location.reload();
 }
 
+// Tombol Refresh Manual
+function manualRefresh() {
+  location.reload();
+}
+
 // Web Worker
 const updateWorker = new Worker('js/worker.js');
 updateWorker.postMessage('start');
@@ -334,6 +339,13 @@ async function checkForUpdates() {
   } catch (err) {
     console.error('Gagal cek update:', err);
   }
+}
+
+// Background Sync ke Service Worker
+if ('serviceWorker' in navigator && 'SyncManager' in window) {
+  navigator.serviceWorker.ready.then(swRegistration => {
+    swRegistration.sync.register('sync-update').catch(err => console.error('Gagal register sync:', err));
+  });
 }
 
 // Event Listeners
