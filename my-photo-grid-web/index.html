@@ -20,8 +20,11 @@
   <nav class="navbar">
     <div class="logo">KEYPOI</div>
     <div style="display: flex; align-items: center; gap: 10px;">
-      <button id="refreshBtn" onclick="forceReload()" style="padding: 8px 12px; font-size: 14px; border: none; background-color: #007bff; color: white; border-radius: 5px; cursor: pointer;">
+      <button id="refreshBtn" onclick="manualRefresh()" style="padding: 8px 12px; font-size: 14px; border: none; background-color: #007bff; color: white; border-radius: 5px; cursor: pointer;">
         <i class="fas fa-sync-alt"></i>
+      </button>
+      <button id="clearCacheBtn" onclick="clearServiceWorkerCache()" style="padding: 8px 12px; font-size: 14px; border: none; background-color: #dc3545; color: white; border-radius: 5px; cursor: pointer;">
+        <i class="fas fa-trash-alt"></i>
       </button>
       <button class="hamburger" onclick="toggleMenu()">
         <img src="hamburger_menu.svg" alt="Menu" width="30">
@@ -72,9 +75,22 @@
 
   <script src="js/script.js"></script>
   <script>
-    // Hard Reload yang Pasti
-    function forceReload() {
-      window.location.replace(window.location.href);
+    function manualRefresh() {
+      location.reload();
+    }
+
+    function clearServiceWorkerCache() {
+      if ('caches' in window) {
+        caches.keys().then(names => {
+          for (let name of names) {
+            caches.delete(name);
+          }
+        }).then(() => {
+          console.log('Cache berhasil dibersihkan.');
+          alert('Cache berhasil dibersihkan. Halaman akan dimuat ulang.');
+          location.reload(true);
+        });
+      }
     }
 
     if ('serviceWorker' in navigator) {
@@ -90,10 +106,6 @@
         document.getElementById('updateNotice').style.display = 'block';
       }
     };
-
-    function updateContent() {
-      forceReload();
-    }
   </script>
 </body>
 
