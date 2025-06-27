@@ -14,10 +14,18 @@ self.onmessage = function (e) {
 
         lastKnownVersion = currentVersion;
 
+        // Jika support background sync, kirim sinyal ke service worker
+        if ('SyncManager' in self) {
+          self.registration.sync.register('sync-update').catch(err => console.error('Worker gagal register sync:', err));
+        }
+
       } catch (err) {
         console.error('Worker gagal cek update:', err);
       }
     }
+
+    // Jalankan cek pertama langsung
+    checkUpdate();
 
     // Cek setiap 5 detik
     setInterval(checkUpdate, 5000);
