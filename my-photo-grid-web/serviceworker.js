@@ -2,29 +2,32 @@ const CACHE_NAME = 'keylapoi-cache-v1';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/favicon.ico',
   '/css/style.css',
   '/js/script.js',
   '/js/worker.js',
+  '/favicon.ico',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css'
 ];
 
+// Install Service Worker dan cache file statis
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(urlsToCache);
-    })
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        return cache.addAll(urlsToCache);
+      })
   );
   self.skipWaiting();
 });
 
+// Activate Service Worker dan hapus cache lama jika ada
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
-        cacheNames.map(cache => {
-          if (cache !== CACHE_NAME) {
-            return caches.delete(cache);
+        cacheNames.map(name => {
+          if (name !== CACHE_NAME) {
+            return caches.delete(name);
           }
         })
       );
@@ -33,26 +36,21 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
+// Fetch handler untuk cache-first strategy
 self.addEventListener('fetch', event => {
-  if (event.request.url.includes('data/index.json')) {
-    // Data selalu fetch dari server (tidak cache)
-    return;
-  }
-
   event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
-    })
+    caches.match(event.request)
+      .then(response => {
+        // Jika ada di cache, pakai cache
+        if (response) {
+          return response;
+        }
+        // Jika tidak ada di cache, fetch dari network
+        return fetch(event.request);
+      })
+      .catch(() => {
+        // Optional: fallback ke halaman offline jika diperlukan
+        return caches.match('/index.html');
+      })
   );
-});
-
-self.addEventListener('sync', event => {
-  if (event.tag === 'sync-update') {
-    console.log('Background sync update berjalan...');
-    event.waitUntil(self.clients.matchAll().then(clients => {
-      clients.forEach(client => {
-        client.postMessage('update');
-      });
-    }));
-  }
 });
