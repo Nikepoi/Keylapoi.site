@@ -8,11 +8,35 @@
   <meta name="description" content="Bokep indonesia, bokep jepang, bokep barat, konten viral terbaru, bokep viral terbaru, bokep terbaru, bokep terlengkap tampa vpn, bokep jepang terbaru , bokep indo terbaru, keylapoi bokep, bokep omek, bokep lesbi, bokep ngewe, ngewe viral">
   <meta name="keywords" content="Bokep indonesia, bokep jepang, bokep barat, konten viral terbaru, bokep viral terbaru, bokep terbaru, bokep terlengkap tampa vpn, bokep jepang terbaru , bokep indo terbaru, keylapoi bokep, bokep omek, bokep lesbi, bokep ngewe, ngewe viral">
   <meta name="author" content="Keylapoi">
+  <meta name="theme-color" content="#000000">
+  <link rel="manifest" href="/manifest.json">
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    #splash {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #000;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+      z-index: 9999;
+    }
+  </style>
 </head>
 
 <body>
+  <!-- Splash Screen -->
+  <div id="splash">
+    <div>
+      <i class="fas fa-spinner fa-spin" style="font-size: 40px;"></i>
+      <p style="margin-top: 10px;">Memuat Konten...</p>
+    </div>
+  </div>
+
   <nav class="navbar">
     <div class="logo">KEYPOI</div>
     <button class="hamburger" onclick="toggleMenu()">
@@ -33,11 +57,17 @@
     </ul>
   </nav>
 
+  <div style="text-align:center; margin: 20px;">
+    <button id="refreshBtn" onclick="manualRefresh()" style="padding: 10px 20px; font-size: 16px; border: none; background-color: #007bff; color: white; border-radius: 5px; cursor: pointer;">
+      <i class="fas fa-sync-alt"></i> Refresh Konten
+    </button>
+  </div>
+
   <main class="grid-container" id="postGrid"></main>
 
   <div class="pagination">
-    <button id="prevBtn" onclick="prevPage()">Previous</button>
-    <button id="nextBtn" onclick="nextPage()">Next</button>
+    <button id="prevBtn" onclick="prevPage()"><i class="fas fa-arrow-left"></i> Previous</button>
+    <button id="nextBtn" onclick="nextPage()">Next <i class="fas fa-arrow-right"></i></button>
   </div>
 
   <div id="overlay" class="overlay" onclick="closeOverlay(event)">
@@ -54,7 +84,7 @@
   </div>
 
   <div id="updateNotice" style="display:none; position:fixed; top:80px; right:20px; background:#333; color:#fff; padding:10px 20px; border-radius:8px; cursor:pointer; z-index:1000; box-shadow:0 2px 5px rgba(0,0,0,0.3);" onclick="updateContent()">
-    Konten Baru Tersedia - Klik untuk Update
+    <i class="fas fa-bell"></i> Klik untuk cek update
   </div>
 
   <footer class="site-footer">
@@ -62,6 +92,35 @@
   </footer>
 
   <script src="js/script.js"></script>
+  <script>
+    // Fungsi tombol refresh manual
+    function manualRefresh() {
+      location.reload();
+    }
+
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/serviceworker.js')
+        .then(reg => console.log('Service Worker terdaftar:', reg.scope))
+        .catch(err => console.error('Service Worker gagal:', err));
+    }
+
+    // Auto start Web Worker
+    const updateWorker = new Worker('js/worker.js');
+    updateWorker.postMessage('start');
+    updateWorker.onmessage = function (e) {
+      if (e.data === 'update') {
+        document.getElementById('updateNotice').style.display = 'block';
+      }
+    };
+
+    // Hilangkan splash screen setelah halaman load
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.getElementById('splash').style.display = 'none';
+      }, 500);
+    });
+  </script>
 </body>
 
-  </html>
+      </html>
