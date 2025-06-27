@@ -53,7 +53,6 @@ async function loadAllPosts() {
       posts = cachedPosts;
       posts.sort((a, b) => new Date(b.date) - new Date(a.date));
       hideLoader();
-      document.getElementById('splash').style.display = 'none'; // Tambahan
       filterPosts(window.location.hash.replace('#', '') || 'beranda', false);
       return;
     }
@@ -79,7 +78,6 @@ async function loadAllPosts() {
     console.error("Gagal load post:", err);
   } finally {
     hideLoader();
-    document.getElementById('splash').style.display = 'none'; // Tambahan
     filterPosts(window.location.hash.replace('#', '') || 'beranda', false);
   }
 }
@@ -261,7 +259,6 @@ function outsideClickListener(event) {
   }
 }
 
-// IndexedDB Functions
 function openDB() {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open('KeylapoiDB', 1);
@@ -306,12 +303,10 @@ function clearCache(db) {
   });
 }
 
-// Update Handler
 function updateContent() {
   location.reload();
 }
 
-// Web Worker
 const updateWorker = new Worker('js/worker.js');
 updateWorker.postMessage('start');
 
@@ -321,7 +316,6 @@ updateWorker.onmessage = function (e) {
   }
 };
 
-// Cek Update
 async function checkForUpdates() {
   try {
     const response = await fetch('data/index.json', { cache: "no-store" });
@@ -338,14 +332,12 @@ async function checkForUpdates() {
   }
 }
 
-// Background Sync ke Service Worker
 if ('serviceWorker' in navigator && 'SyncManager' in window) {
   navigator.serviceWorker.ready.then(swRegistration => {
     swRegistration.sync.register('sync-update').catch(err => console.error('Gagal register sync:', err));
   });
 }
 
-// Event Listeners
 window.addEventListener('hashchange', () => {
   filterPosts(window.location.hash.replace('#', '') || 'beranda', false);
 });
