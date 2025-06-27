@@ -102,10 +102,10 @@
     { "file": "local/cipawel.json" },
     { "file": "asia/minky88.json" },
     { "file": "local/cacil.json" },
-    { "file": "local/arathena.json" }
-  ,
-    { "file": "asia/chescake.json" }
-  ,
-    { "file": "asia/yanying.json" }
+    { "file": "local/arathena.json" },
+    { "file": "asia/chescake.json" },
+    { "file": "asia/yanying.json" },
+    { "file": "local/azalea.json" },
+    { "fild": "local/ciaboba.json" }
   ]
     }
