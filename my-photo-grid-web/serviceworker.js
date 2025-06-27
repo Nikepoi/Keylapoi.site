@@ -10,8 +10,10 @@ const urlsToCache = [
 ];
 
 self.addEventListener('install', event => {
+  console.log('[Service Worker] Installing...');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
+      console.log('[Service Worker] Caching all resources');
       return cache.addAll(urlsToCache);
     })
   );
@@ -19,11 +21,13 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
+  console.log('[Service Worker] Activating...');
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cache => {
           if (cache !== CACHE_NAME) {
+            console.log('[Service Worker] Deleting old cache:', cache);
             return caches.delete(cache);
           }
         })
@@ -35,24 +39,26 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   if (event.request.url.includes('/data/')) {
-    // Semua file di folder /data selalu ambil dari server (tidak cache)
-    return;
+    // Untuk /data selalu bypass cache
+    return fetch(event.request).then(response => response).catch(err => console.error('Fetch error:', err));
   }
 
   event.respondWith(
     caches.match(event.request).then(response => {
-      return response || fetch(event.request);
+      return response || fetch(event.request).catch(err => console.error('Fetch error:', err));
     })
   );
 });
 
 self.addEventListener('sync', event => {
   if (event.tag === 'sync-update') {
-    console.log('Background sync update berjalan...');
-    event.waitUntil(self.clients.matchAll().then(clients => {
-      clients.forEach(client => {
-        client.postMessage('update');
-      });
-    }));
+    console.log('[Service Worker] Background sync berjalan...');
+    event.waitUntil(
+      self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
+          client.postMessage('update');
+        });
+      })
+    );
   }
 });
