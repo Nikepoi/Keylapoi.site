@@ -53,6 +53,7 @@ async function loadAllPosts() {
       posts = cachedPosts;
       posts.sort((a, b) => new Date(b.date) - new Date(a.date));
       hideLoader();
+      document.getElementById('splash').style.display = 'none'; // Tambahan
       filterPosts(window.location.hash.replace('#', '') || 'beranda', false);
       return;
     }
@@ -78,6 +79,7 @@ async function loadAllPosts() {
     console.error("Gagal load post:", err);
   } finally {
     hideLoader();
+    document.getElementById('splash').style.display = 'none'; // Tambahan
     filterPosts(window.location.hash.replace('#', '') || 'beranda', false);
   }
 }
@@ -306,11 +308,6 @@ function clearCache(db) {
 
 // Update Handler
 function updateContent() {
-  location.reload();
-}
-
-// Tombol Refresh Manual
-function manualRefresh() {
   location.reload();
 }
 
