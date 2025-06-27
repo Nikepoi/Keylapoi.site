@@ -5,8 +5,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Keylapoi</title>
-  <meta name="description" content="Bokep indonesia, bokep jepang, bokep barat, konten viral terbaru, bokep viral terbaru, bokep terbaru, bokep terlengkap tampa vpn, bokep jepang terbaru , bokep indo terbaru, keylapoi bokep, bokep omek, bokep lesbi, bokep ngewe, ngewe viral">
-  <meta name="keywords" content="Bokep indonesia, bokep jepang, bokep barat, konten viral terbaru, bokep viral terbaru, bokep terbaru, bokep terlengkap tampa vpn, bokep jepang terbaru , bokep indo terbaru, keylapoi bokep, bokep omek, bokep lesbi, bokep ngewe, ngewe viral">
+  <meta name="description" content="Bokep indonesia, bokep jepang, bokep barat, konten viral terbaru, bokep viral terbaru, bokep terbaru, bokep terlengkap tanpa vpn, bokep jepang terbaru , bokep indo terbaru, keylapoi bokep, bokep omek, bokep lesbi, bokep ngewe, ngewe viral">
+  <meta name="keywords" content="Bokep indonesia, bokep jepang, bokep barat, konten viral terbaru, bokep viral terbaru, bokep terbaru, bokep terlengkap tanpa vpn, bokep jepang terbaru , bokep indo terbaru, keylapoi bokep, bokep omek, bokep lesbi, bokep ngewe, ngewe viral">
   <meta name="author" content="Keylapoi">
   <meta name="theme-color" content="#000000">
   <link rel="manifest" href="/manifest.json">
@@ -16,7 +16,10 @@
   <style>
     #splash {
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
       background-color: #000;
       color: #fff;
       display: flex;
@@ -100,21 +103,12 @@
 
     // Register Service Worker
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/serviceworker.js')
+      navigator.serviceWorker.register('/service-worker.js')
         .then(reg => console.log('Service Worker terdaftar:', reg.scope))
         .catch(err => console.error('Service Worker gagal:', err));
     }
 
-    // Auto start Web Worker
-    const updateWorker = new Worker('js/worker.js');
-    updateWorker.postMessage('start');
-    updateWorker.onmessage = function (e) {
-      if (e.data === 'update') {
-        document.getElementById('updateNotice').style.display = 'block';
-      }
-    };
-
-    // Hilangkan splash screen setelah halaman load
+    // Hilangkan splash screen setelah halaman benar-benar load
     window.addEventListener('load', () => {
       setTimeout(() => {
         document.getElementById('splash').style.display = 'none';
@@ -123,4 +117,4 @@
   </script>
 </body>
 
-      </html>
+            </html>
