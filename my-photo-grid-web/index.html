@@ -20,7 +20,7 @@
   <nav class="navbar">
     <div class="logo">KEYPOI</div>
     <div style="display: flex; align-items: center; gap: 10px;">
-      <button id="refreshBtn" onclick="manualRefresh()" style="padding: 8px 12px; font-size: 14px; border: none; background-color: #007bff; color: white; border-radius: 5px; cursor: pointer;">
+      <button id="refreshBtn" onclick="forceReload()" style="padding: 8px 12px; font-size: 14px; border: none; background-color: #007bff; color: white; border-radius: 5px; cursor: pointer;">
         <i class="fas fa-sync-alt"></i>
       </button>
       <button class="hamburger" onclick="toggleMenu()">
@@ -72,16 +72,19 @@
 
   <script src="js/script.js"></script>
   <script>
-    function manualRefresh() {
-      location.reload();
+    // Force Hard Refresh (abaikan cache)
+    function forceReload() {
+      window.location.reload(true);
     }
 
+    // Service Worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/serviceworker.js')
         .then(reg => console.log('Service Worker terdaftar:', reg.scope))
         .catch(err => console.error('Service Worker gagal:', err));
     }
 
+    // Web Worker
     const updateWorker = new Worker('js/worker.js');
     updateWorker.postMessage('start');
     updateWorker.onmessage = function (e) {
@@ -89,7 +92,11 @@
         document.getElementById('updateNotice').style.display = 'block';
       }
     };
+
+    function updateContent() {
+      forceReload();
+    }
   </script>
 </body>
 
-    </html>
+  </html>
