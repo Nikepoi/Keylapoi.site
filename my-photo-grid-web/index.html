@@ -13,38 +13,20 @@
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <style>
-    #splash {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #000;
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 24px;
-      z-index: 9999;
-    }
-  </style>
 </head>
 
 <body>
-  <!-- Splash Screen -->
-  <div id="splash">
-    <div>
-      <i class="fas fa-spinner fa-spin" style="font-size: 40px;"></i>
-      <p style="margin-top: 10px;">Memuat Konten...</p>
-    </div>
-  </div>
 
   <nav class="navbar">
     <div class="logo">KEYPOI</div>
-    <button class="hamburger" onclick="toggleMenu()">
-      <img src="hamburger_menu.svg" alt="Menu" width="30">
-    </button>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <button id="refreshBtn" onclick="manualRefresh()" style="padding: 8px 12px; font-size: 14px; border: none; background-color: #007bff; color: white; border-radius: 5px; cursor: pointer;">
+        <i class="fas fa-sync-alt"></i>
+      </button>
+      <button class="hamburger" onclick="toggleMenu()">
+        <img src="hamburger_menu.svg" alt="Menu" width="30">
+      </button>
+    </div>
     <ul class="nav-menu" id="navMenu">
       <button class="close-menu" onclick="toggleMenu()">
         <img src="close_icon.svg" alt="Close" width="30">
@@ -59,12 +41,6 @@
       <li><a href="#jav" onclick="filterPosts('jav')">JAV Sub indo</a></li>
     </ul>
   </nav>
-
-  <div style="text-align:center; margin: 20px;">
-    <button id="refreshBtn" onclick="manualRefresh()" style="padding: 10px 20px; font-size: 16px; border: none; background-color: #007bff; color: white; border-radius: 5px; cursor: pointer;">
-      <i class="fas fa-sync-alt"></i> Refresh Konten
-    </button>
-  </div>
 
   <main class="grid-container" id="postGrid"></main>
 
@@ -96,25 +72,24 @@
 
   <script src="js/script.js"></script>
   <script>
-    // Fungsi tombol refresh manual
     function manualRefresh() {
       location.reload();
     }
 
-    // Register Service Worker
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/service-worker.js')
+      navigator.serviceWorker.register('/serviceworker.js')
         .then(reg => console.log('Service Worker terdaftar:', reg.scope))
         .catch(err => console.error('Service Worker gagal:', err));
     }
 
-    // Hilangkan splash screen setelah halaman benar-benar load
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        document.getElementById('splash').style.display = 'none';
-      }, 500);
-    });
+    const updateWorker = new Worker('js/worker.js');
+    updateWorker.postMessage('start');
+    updateWorker.onmessage = function (e) {
+      if (e.data === 'update') {
+        document.getElementById('updateNotice').style.display = 'block';
+      }
+    };
   </script>
 </body>
 
-            </html>
+    </html>
