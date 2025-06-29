@@ -111,6 +111,7 @@
     { "file": "asia/cocopie.json", "version": "1" },
     { "file": "local/pecita.json", "version": "1" },
     { "file": "local/inka.json", "version": "1" },
-    { "file": "local_random/local15.json", "version": "1" }
+    { "file": "local_random/local15.json", "version": "1" },
+    { "file": "asia_random/cos07.json", "version": "1" }
   ]
     }
