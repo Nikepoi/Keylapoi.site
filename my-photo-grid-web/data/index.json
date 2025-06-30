@@ -113,6 +113,7 @@
     { "file": "local/inka.json", "version": "1" },
     { "file": "local_random/local15.json", "version": "1" },
     { "file": "asia_random/cos07.json", "version": "1" },
-    { "file": "local/kolpri01.json", "version": "1" }
+    { "file": "local/kolpri01.json", "version": "1" },
+    { "file": "asia/soe_anh.json", "version": "1" }
   ]
     }
