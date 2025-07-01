@@ -3,6 +3,9 @@ let filteredPosts = [];
 let currentPage = 1;
 const postsPerPage = 20;
 
+const STATIC_CACHE_NAME = 'keylapoi-static-v3';
+const DATA_CACHE_NAME = 'keylapoi-data-v3';
+
 function decodeUrl(encodedUrl) {
   try {
     const decoded = atob(encodedUrl);
@@ -29,6 +32,20 @@ function updateProgress(progress) {
   document.getElementById('progressText').innerText = `${progress}%`;
 }
 
+async function updateDownloadLog(fileName) {
+  const cache = await caches.open(DATA_CACHE_NAME);
+  const logRequest = new Request(`/log/${fileName}`);
+  const logResponse = new Response(JSON.stringify({ downloaded: true }), { headers: { 'Content-Type': 'application/json' } });
+  await cache.put(logRequest, logResponse);
+}
+
+async function isAlreadyDownloaded(fileName) {
+  const cache = await caches.open(DATA_CACHE_NAME);
+  const logRequest = new Request(`/log/${fileName}`);
+  const response = await cache.match(logRequest);
+  return !!response;
+}
+
 async function loadAllPosts() {
   showLoader();
   posts.length = 0;
@@ -39,40 +56,38 @@ async function loadAllPosts() {
     const indexData = await indexRes.json();
     const lastModified = indexData.lastModified;
 
-    const db = await openDB();
-    const cachedVersion = localStorage.getItem('indexVersion');
-
-    if (cachedVersion === lastModified) {
-      const cachedPosts = await getCachedPosts(db);
-      if (cachedPosts && cachedPosts.length) {
-        posts = cachedPosts;
-        posts.sort((a, b) => new Date(b.date) - new Date(a.date));
-        hideLoader();
-        filterPosts(window.location.hash.replace('#', '') || 'beranda', false);
-        return;
-      }
-    }
-
     localStorage.setItem('indexVersion', lastModified);
-    await clearCache(db);
+
+    const db = await openDB();
 
     let loadedCount = 0;
 
     for (let i = indexData.files.length - 1; i >= 0; i--) {
       const entry = indexData.files[i];
-      const filePath = `data/${entry.file}`;
-      const res = await fetch(filePath);
-      if (res.ok) {
-        const post = await res.json();
-        posts.push(post);
-        await savePost(db, post);
-        loadedCount++;
-        const progress = Math.floor((loadedCount / indexData.files.length) * 100);
-        updateProgress(progress);
+
+      const alreadyDownloaded = await isAlreadyDownloaded(entry.file);
+
+      if (!alreadyDownloaded) {
+        const filePath = `data/${entry.file}`;
+        const res = await fetch(filePath);
+        if (res.ok) {
+          const post = await res.json();
+          posts.push(post);
+          await savePost(db, post);
+          await updateDownloadLog(entry.file);
+          loadedCount++;
+          const progress = Math.floor((loadedCount / indexData.files.length) * 100);
+          updateProgress(progress);
+        }
       }
     }
 
-    posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+    const cachedPosts = await getCachedPosts(db);
+    if (cachedPosts && cachedPosts.length) {
+      posts = cachedPosts;
+      posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+    }
+
   } catch (err) {
     console.error("Gagal load post:", err);
   } finally {
@@ -261,7 +276,7 @@ function outsideClickListener(event) {
 // IndexedDB Functions
 function openDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('KeylapoiDB_v2', 1); // DB sudah di rename
+    const request = indexedDB.open('KeylapoiDB_v2', 1);
     request.onerror = () => reject('Gagal buka database');
     request.onsuccess = () => resolve(request.result);
     request.onupgradeneeded = function (e) {
@@ -293,16 +308,6 @@ function getCachedPosts(db) {
   });
 }
 
-function clearCache(db) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction('posts', 'readwrite');
-    const store = tx.objectStore('posts');
-    const request = store.clear();
-    request.onsuccess = () => resolve();
-    request.onerror = () => reject('Gagal hapus cache');
-  });
-}
-
 // Update Handler
 function updateContent() {
   location.reload();
@@ -318,26 +323,9 @@ updateWorker.postMessage('start');
 
 updateWorker.onmessage = function (e) {
   if (e.data === 'update') {
-    checkForUpdates();
+    location.reload();
   }
 };
-
-// Cek Update
-async function checkForUpdates() {
-  try {
-    const response = await fetch('data/index.json', { cache: "no-store" });
-    const indexData = await response.json();
-    const newVersion = indexData.lastModified;
-
-    const oldVersion = localStorage.getItem('indexVersion');
-
-    if (newVersion !== oldVersion) {
-      document.getElementById('updateNotice').style.display = 'block';
-    }
-  } catch (err) {
-    console.error('Gagal cek update:', err);
-  }
-}
 
 // Background Sync ke Service Worker
 if ('serviceWorker' in navigator && 'SyncManager' in window) {
