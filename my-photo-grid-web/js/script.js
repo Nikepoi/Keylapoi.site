@@ -42,23 +42,24 @@ async function loadAllPosts() {
     const db = await openDB();
     const cachedVersion = localStorage.getItem('indexVersion');
 
-    if (cachedVersion !== lastModified) {
-      localStorage.setItem('indexVersion', lastModified);
+    if (cachedVersion === lastModified) {
+      const cachedPosts = await getCachedPosts(db);
+      if (cachedPosts && cachedPosts.length) {
+        posts = cachedPosts;
+        posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+        hideLoader();
+        filterPosts(window.location.hash.replace('#', '') || 'beranda', false);
+        return;
+      }
     }
 
-    const cachedPosts = await getCachedPosts(db);
-
-    if (cachedPosts && cachedPosts.length) {
-      posts = cachedPosts;
-    }
+    localStorage.setItem('indexVersion', lastModified);
+    await clearCache(db);
 
     let loadedCount = 0;
 
     for (let i = indexData.files.length - 1; i >= 0; i--) {
       const entry = indexData.files[i];
-
-      if (await isPostCached(db, entry.file)) continue;
-
       const filePath = `data/${entry.file}`;
       const res = await fetch(filePath);
       if (res.ok) {
@@ -78,16 +79,6 @@ async function loadAllPosts() {
     hideLoader();
     filterPosts(window.location.hash.replace('#', '') || 'beranda', false);
   }
-}
-
-function isPostCached(db, id) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction('posts', 'readonly');
-    const store = tx.objectStore('posts');
-    const request = store.get(id);
-    request.onsuccess = () => resolve(!!request.result);
-    request.onerror = () => reject('Gagal cek post cache');
-  });
 }
 
 function getCurrentPagePosts() {
@@ -270,7 +261,7 @@ function outsideClickListener(event) {
 // IndexedDB Functions
 function openDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('KeylapoiDB', 1);
+    const request = indexedDB.open('KeylapoiDB_v2', 1); // DB sudah di rename
     request.onerror = () => reject('Gagal buka database');
     request.onsuccess = () => resolve(request.result);
     request.onupgradeneeded = function (e) {
@@ -299,6 +290,16 @@ function getCachedPosts(db) {
     const request = store.getAll();
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject('Gagal ambil post dari cache');
+  });
+}
+
+function clearCache(db) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('posts', 'readwrite');
+    const store = tx.objectStore('posts');
+    const request = store.clear();
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject('Gagal hapus cache');
   });
 }
 
