@@ -6,9 +6,8 @@ self.onmessage = function (e) {
       try {
         const response = await fetch('data/index.json', { cache: 'no-store' });
 
-        // Tambahkan validasi status response
         if (!response.ok) {
-          console.error('Worker: File index.json tidak ditemukan. Status:', response.status);
+          console.error('Worker: index.json tidak ditemukan. Status:', response.status);
           return;
         }
 
@@ -26,11 +25,14 @@ self.onmessage = function (e) {
       }
     }
 
+    // Background Sync untuk server yang support
     if ('SyncManager' in self && self.registration) {
       self.registration.sync.register('sync-update').catch(err => console.error('Worker gagal register sync:', err));
     }
 
     checkUpdate();
-    setInterval(checkUpdate, 5000);
+
+    // Interval 15 detik biar tidak terlalu spam server
+    setInterval(checkUpdate, 15000);
   }
 };
