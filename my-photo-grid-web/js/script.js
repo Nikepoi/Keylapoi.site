@@ -44,8 +44,17 @@ async function loadAllPosts() {
 
     if (cachedVersion !== lastModified) {
       await clearCache(db);
-      await caches.keys().then(names => Promise.all(names.map(name => caches.delete(name))));
       localStorage.setItem('indexVersion', lastModified);
+    }
+
+    const cachedPosts = await getCachedPosts(db);
+
+    if (cachedPosts && cachedPosts.length) {
+      posts = cachedPosts;
+      posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+      hideLoader();
+      filterPosts(window.location.hash.replace('#', '') || 'beranda', false);
+      return;
     }
 
     let loadedCount = 0;
@@ -53,27 +62,15 @@ async function loadAllPosts() {
     for (let i = indexData.files.length - 1; i >= 0; i--) {
       const entry = indexData.files[i];
       const filePath = `data/${entry.file}`;
-
-      try {
-        const res = await fetch(filePath, { cache: 'no-store' });
-        if (res.ok) {
-          const post = await res.json();
-          posts.push(post);
-          await savePost(db, post);
-        } else {
-          console.error(`Gagal fetch ${filePath}, status: ${res.status}`);
-        }
-      } catch (err) {
-        console.error(`Error ambil ${filePath}:`, err);
+      const res = await fetch(filePath);
+      if (res.ok) {
+        const post = await res.json();
+        posts.push(post);
+        await savePost(db, post);
+        loadedCount++;
+        const progress = Math.floor((loadedCount / indexData.files.length) * 100);
+        updateProgress(progress);
       }
-
-      loadedCount++;
-      const progress = Math.floor((loadedCount / indexData.files.length) * 100);
-      updateProgress(progress);
-    }
-
-    if (posts.length === 0) {
-      console.warn('Tidak ada post yang berhasil dimuat.');
     }
 
     posts.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -83,4 +80,279 @@ async function loadAllPosts() {
     hideLoader();
     filterPosts(window.location.hash.replace('#', '') || 'beranda', false);
   }
-        }
+}
+
+function getCurrentPagePosts() {
+  const start = (currentPage - 1) * postsPerPage;
+  const end = start + postsPerPage;
+  return filteredPosts.slice(start, end);
+}
+
+function displayPosts(postsToShow) {
+  const gridContainer = document.getElementById('postGrid');
+  gridContainer.innerHTML = '';
+
+  postsToShow.forEach(post => {
+    const postElement = document.createElement('div');
+    postElement.classList.add('grid-item');
+
+    const img = document.createElement('img');
+    img.src = post.image;
+    img.alt = post.title;
+    img.loading = "lazy";
+    img.onclick = () => showOverlay(post);
+
+    postElement.appendChild(img);
+    gridContainer.appendChild(postElement);
+  });
+}
+
+function renderLinks(label, links) {
+  let html = `<h4>Download via ${label}</h4><ul>`;
+
+  if (Array.isArray(links)) {
+    links.forEach((link, i) => {
+      html += `<li><a class="download-button" href="${decodeUrl(link)}" target="_blank">${label} ${i + 1}</a></li>`;
+    });
+  } else if (typeof links === 'string' && links.trim() !== '') {
+    html += `<li><a class="download-button" href="${decodeUrl(links)}" target="_blank">Full Konten</a></li>`;
+  }
+
+  html += `</ul>`;
+  return html;
+}
+
+function showOverlay(post) {
+  const overlay = document.getElementById('overlay');
+  const content = document.getElementById('overlayContent');
+
+  let html = `<img src="${post.image}" alt="${post.title}" style="width: 100%; height: auto; max-height: 60vh; object-fit: contain;" />
+    <h3>${post.title}</h3>`;
+
+  if (post.links?.videy) html += renderLinks('Videy', post.links.videy);
+  if (post.links?.terabox) html += renderLinks('Terabox', post.links.terabox);
+  if (post.links?.mediafire) html += renderLinks('Mediafire', post.links.mediafire);
+  if (post.links?.pixeldrain) html += renderLinks('PixelDrain', post.links.pixeldrain);
+
+  content.innerHTML = html;
+  overlay.style.display = "flex";
+}
+
+function closeOverlay(event) {
+  if (event.target.id === "overlay" || event.target.classList.contains("close-btn")) {
+    document.getElementById('overlay').style.display = "none";
+  }
+}
+
+function updatePagination() {
+  const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+  document.getElementById('prevBtn').style.display = currentPage > 1 ? 'inline-block' : 'none';
+  document.getElementById('nextBtn').style.display = currentPage < totalPages ? 'inline-block' : 'none';
+}
+
+function setActiveMenu(genre) {
+  const menuLinks = document.querySelectorAll('.nav-menu li a');
+  menuLinks.forEach(link => {
+    link.classList.remove('active-genre');
+    if (link.getAttribute('href') === `#${genre}`) {
+      link.classList.add('active-genre');
+    }
+  });
+}
+
+function filterPosts(genre, save = true) {
+  showLoader();
+  setTimeout(() => {
+    if (genre === 'all' || genre === 'beranda') {
+      filteredPosts = posts;
+    } else {
+      filteredPosts = posts.filter(post => post.genre && post.genre.toLowerCase() === genre.toLowerCase());
+    }
+
+    currentPage = 1;
+    displayPosts(getCurrentPagePosts());
+    updatePagination();
+    hideLoader();
+
+    if (save) {
+      window.location.hash = genre === 'all' ? 'beranda' : genre;
+    }
+
+    setActiveMenu(genre);
+    closeMenu();
+    scrollToTop();
+  }, 300);
+}
+
+function nextPage() {
+  showLoader();
+  setTimeout(() => {
+    const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+    if (currentPage < totalPages) {
+      currentPage++;
+      displayPosts(getCurrentPagePosts());
+      updatePagination();
+      scrollToTop();
+    }
+    hideLoader();
+  }, 300);
+}
+
+function prevPage() {
+  showLoader();
+  setTimeout(() => {
+    if (currentPage > 1) {
+      currentPage--;
+      displayPosts(getCurrentPagePosts());
+      updatePagination();
+      scrollToTop();
+    }
+    hideLoader();
+  }, 300);
+}
+
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function toggleMenu() {
+  const menu = document.getElementById('navMenu');
+  const hamburger = document.querySelector('.hamburger');
+
+  if (menu.classList.contains('active')) {
+    menu.style.transformOrigin = 'top right';
+    menu.style.transform = 'scale(0)';
+    menu.style.opacity = '0';
+    hamburger.classList.remove('is-active');
+    setTimeout(() => { menu.classList.remove('active'); }, 300);
+  } else {
+    menu.classList.add('active');
+    menu.style.transformOrigin = 'top right';
+    setTimeout(() => {
+      menu.style.transform = 'scale(1)';
+      menu.style.opacity = '1';
+    }, 10);
+    hamburger.classList.add('is-active');
+    document.addEventListener('click', outsideClickListener);
+  }
+}
+
+function closeMenu() {
+  const menu = document.getElementById('navMenu');
+  const hamburger = document.querySelector('.hamburger');
+
+  if (menu.classList.contains('active')) {
+    menu.style.transformOrigin = 'top right';
+    menu.style.transform = 'scale(0)';
+    menu.style.opacity = '0';
+    hamburger.classList.remove('is-active');
+    setTimeout(() => { menu.classList.remove('active'); }, 300);
+    document.removeEventListener('click', outsideClickListener);
+  }
+}
+
+function outsideClickListener(event) {
+  const menu = document.getElementById('navMenu');
+  const hamburger = document.querySelector('.hamburger');
+  if (!menu.contains(event.target) && !hamburger.contains(event.target)) {
+    closeMenu();
+  }
+}
+
+// IndexedDB Functions
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('KeylapoiDB', 1);
+    request.onerror = () => reject('Gagal buka database');
+    request.onsuccess = () => resolve(request.result);
+    request.onupgradeneeded = function (e) {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('posts')) {
+        db.createObjectStore('posts', { keyPath: 'id' });
+      }
+    };
+  });
+}
+
+function savePost(db, post) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('posts', 'readwrite');
+    const store = tx.objectStore('posts');
+    store.put(post);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject('Gagal simpan post');
+  });
+}
+
+function getCachedPosts(db) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('posts', 'readonly');
+    const store = tx.objectStore('posts');
+    const request = store.getAll();
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject('Gagal ambil post dari cache');
+  });
+}
+
+function clearCache(db) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('posts', 'readwrite');
+    const store = tx.objectStore('posts');
+    const request = store.clear();
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject('Gagal hapus cache');
+  });
+}
+
+// Update Handler
+function updateContent() {
+  location.reload();
+}
+
+// Tombol Refresh Manual
+function manualRefresh() {
+  location.reload();
+}
+
+// Web Worker
+const updateWorker = new Worker('js/worker.js');
+updateWorker.postMessage('start');
+
+updateWorker.onmessage = function (e) {
+  if (e.data === 'update') {
+    checkForUpdates();
+  }
+};
+
+// Cek Update
+async function checkForUpdates() {
+  try {
+    const response = await fetch('data/index.json', { cache: "no-store" });
+    const indexData = await response.json();
+    const newVersion = indexData.lastModified;
+
+    const oldVersion = localStorage.getItem('indexVersion');
+
+    if (newVersion !== oldVersion) {
+      document.getElementById('updateNotice').style.display = 'block';
+    }
+  } catch (err) {
+    console.error('Gagal cek update:', err);
+  }
+}
+
+// Background Sync ke Service Worker
+if ('serviceWorker' in navigator && 'SyncManager' in window) {
+  navigator.serviceWorker.ready.then(swRegistration => {
+    swRegistration.sync.register('sync-update').catch(err => console.error('Gagal register sync:', err));
+  });
+}
+
+// Event Listeners
+window.addEventListener('hashchange', () => {
+  filterPosts(window.location.hash.replace('#', '') || 'beranda', false);
+});
+
+window.addEventListener('load', async () => {
+  await loadAllPosts();
+});
