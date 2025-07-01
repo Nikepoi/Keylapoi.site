@@ -40,38 +40,41 @@ async function loadAllPosts() {
     const lastModified = indexData.lastModified;
 
     const db = await openDB();
+    const cachedVersion = localStorage.getItem('indexVersion');
+
+    let forceReload = false;
+
+    if (cachedVersion !== lastModified) {
+      await clearCache(db);
+      localStorage.setItem('indexVersion', lastModified);
+      forceReload = true;
+    }
+
     const cachedPosts = await getCachedPosts(db);
 
-    // Buat map file yang ada di cache
-    const cacheMap = {};
-    cachedPosts.forEach(post => { cacheMap[post.file] = post; });
+    if (forceReload || !cachedPosts || cachedPosts.length === 0) {
+      let loadedCount = 0;
 
-    let loadedCount = 0;
-
-    for (let i = indexData.files.length - 1; i >= 0; i--) {
-      const entry = indexData.files[i];
-      const filePath = `data/${entry.file}`;
-
-      // Cek apakah sudah ada di cache dan versi sama
-      if (cacheMap[entry.file] && cacheMap[entry.file].version === entry.version) {
-        posts.push(cacheMap[entry.file]);
-      } else {
+      for (let i = indexData.files.length - 1; i >= 0; i--) {
+        const entry = indexData.files[i];
+        const filePath = `data/${entry.file}`;
         const res = await fetch(filePath);
         if (res.ok) {
           const post = await res.json();
-          post.file = entry.file; // Penting: Tambahkan key file
-          post.version = entry.version; // Penting: Tambahkan versi
           posts.push(post);
           await savePost(db, post);
+          loadedCount++;
+          const progress = Math.floor((loadedCount / indexData.files.length) * 100);
+          updateProgress(progress);
         }
       }
 
-      loadedCount++;
-      const progress = Math.floor((loadedCount / indexData.files.length) * 100);
-      updateProgress(progress);
+      posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+    } else {
+      posts = cachedPosts;
+      posts.sort((a, b) => new Date(b.date) - new Date(a.date));
     }
 
-    posts.sort((a, b) => new Date(b.date) - new Date(a.date));
   } catch (err) {
     console.error("Gagal load post:", err);
   } finally {
@@ -266,7 +269,7 @@ function openDB() {
     request.onupgradeneeded = function (e) {
       const db = e.target.result;
       if (!db.objectStoreNames.contains('posts')) {
-        db.createObjectStore('posts', { keyPath: 'file' });
+        db.createObjectStore('posts', { keyPath: 'id' });
       }
     };
   });
@@ -289,6 +292,50 @@ function getCachedPosts(db) {
     const request = store.getAll();
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject('Gagal ambil post dari cache');
+  });
+}
+
+function clearCache(db) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('posts', 'readwrite');
+    const store = tx.objectStore('posts');
+    const request = store.clear();
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject('Gagal hapus cache');
+  });
+}
+
+// Web Worker
+const updateWorker = new Worker('js/worker.js');
+updateWorker.postMessage('start');
+
+updateWorker.onmessage = function (e) {
+  if (e.data === 'update') {
+    checkForUpdates();
+  }
+};
+
+// Cek Update
+async function checkForUpdates() {
+  try {
+    const response = await fetch('data/index.json', { cache: "no-store" });
+    const indexData = await response.json();
+    const newVersion = indexData.lastModified;
+
+    const oldVersion = localStorage.getItem('indexVersion');
+
+    if (newVersion !== oldVersion) {
+      document.getElementById('updateNotice').style.display = 'block';
+    }
+  } catch (err) {
+    console.error('Gagal cek update:', err);
+  }
+}
+
+// Background Sync ke Service Worker
+if ('serviceWorker' in navigator && 'SyncManager' in window) {
+  navigator.serviceWorker.ready.then(swRegistration => {
+    swRegistration.sync.register('sync-update').catch(err => console.error('Gagal register sync:', err));
   });
 }
 
