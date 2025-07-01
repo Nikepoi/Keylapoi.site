@@ -69,8 +69,6 @@
     { "file": "local/rania.json", "version": "1" },
     { "file": "local_random/local10.json", "version": "1" },
     { "file": "local_random/local11.json", "version": "1" },
-    { "file": "local_random/local12.json", "version": "1" },
-    { "file": "local_random/local13.json", "version": "1" },
     { "file": "local/machi.json", "version": "1" },
     { "file": "local/ichahijab.json", "version": "1" },
     { "file": "local_random/local14.json", "version": "1" },
@@ -120,6 +118,5 @@
     { "file": "local/kitkat.json", "version": "1" },
     { "file": "local/pelajar.json", "version": "1" },
     { "file": "local/ukty_rara.json", "version": "1" }
-    
   ]
     }
