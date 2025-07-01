@@ -309,6 +309,11 @@ function updateContent() {
   location.reload();
 }
 
+// Tombol Refresh Manual
+function manualRefresh() {
+  location.reload();
+}
+
 // Web Worker
 const updateWorker = new Worker('js/worker.js');
 updateWorker.postMessage('start');
@@ -336,9 +341,11 @@ async function checkForUpdates() {
   }
 }
 
-// Manual Refresh
-function manualRefresh() {
-  loadAllPosts();
+// Background Sync ke Service Worker
+if ('serviceWorker' in navigator && 'SyncManager' in window) {
+  navigator.serviceWorker.ready.then(swRegistration => {
+    swRegistration.sync.register('sync-update').catch(err => console.error('Gagal register sync:', err));
+  });
 }
 
 // Event Listeners
@@ -349,20 +356,3 @@ window.addEventListener('hashchange', () => {
 window.addEventListener('load', async () => {
   await loadAllPosts();
 });
-
-// Service Worker
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/serviceWorker.js')
-    .then(registration => {
-      console.log('Service Worker terdaftar:', registration);
-    })
-    .catch(error => {
-      console.error('Service Worker gagal terdaftar:', error);
-    });
-
-  navigator.serviceWorker.addEventListener('message', event => {
-    if (event.data === 'update') {
-      document.getElementById('updateNotice').style.display = 'block';
-    }
-  });
-      }
