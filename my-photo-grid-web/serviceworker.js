@@ -1,4 +1,6 @@
-const CACHE_NAME = 'keylapoi-cache-v1';
+const STATIC_CACHE = 'keylapoi-static-v3';
+const DATA_CACHE = 'keylapoi-data-v3';
+
 const urlsToCache = [
   '/',
   '/index.html',
@@ -10,24 +12,18 @@ const urlsToCache = [
 ];
 
 self.addEventListener('install', event => {
-  console.log('[Service Worker] Installing...');
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      console.log('[Service Worker] Caching all resources');
-      return cache.addAll(urlsToCache);
-    })
+    caches.open(STATIC_CACHE).then(cache => cache.addAll(urlsToCache))
   );
   self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
-  console.log('[Service Worker] Activating...');
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cache => {
-          if (cache !== CACHE_NAME) {
-            console.log('[Service Worker] Deleting old cache:', cache);
+          if (cache !== STATIC_CACHE && cache !== DATA_CACHE) {
             return caches.delete(cache);
           }
         })
@@ -39,26 +35,18 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   if (event.request.url.includes('/data/')) {
-    // Untuk /data selalu bypass cache
-    return fetch(event.request).then(response => response).catch(err => console.error('Fetch error:', err));
+    return fetch(event.request).then(response => response).catch(() => caches.match(event.request));
   }
 
   event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request).catch(err => console.error('Fetch error:', err));
-    })
+    caches.match(event.request).then(response => response || fetch(event.request))
   );
 });
 
 self.addEventListener('sync', event => {
   if (event.tag === 'sync-update') {
-    console.log('[Service Worker] Background sync berjalan...');
-    event.waitUntil(
-      self.clients.matchAll().then(clients => {
-        clients.forEach(client => {
-          client.postMessage('update');
-        });
-      })
-    );
+    self.clients.matchAll().then(clients => {
+      clients.forEach(client => client.postMessage('update'));
+    });
   }
 });
