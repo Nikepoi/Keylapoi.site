@@ -5,6 +5,13 @@ self.onmessage = function (e) {
     async function checkUpdate() {
       try {
         const response = await fetch('data/index.json', { cache: 'no-store' });
+
+        // Tambahkan validasi status response
+        if (!response.ok) {
+          console.error('Worker: File index.json tidak ditemukan. Status:', response.status);
+          return;
+        }
+
         const data = await response.json();
         const currentVersion = data.lastModified;
 
@@ -19,15 +26,11 @@ self.onmessage = function (e) {
       }
     }
 
-    // Register Background Sync sekali di awal
     if ('SyncManager' in self && self.registration) {
       self.registration.sync.register('sync-update').catch(err => console.error('Worker gagal register sync:', err));
     }
 
-    // Jalankan cek pertama langsung
     checkUpdate();
-
-    // Cek update setiap 5 detik
     setInterval(checkUpdate, 5000);
   }
 };
