@@ -53,7 +53,7 @@ async function loadAllPosts() {
       posts = cachedPosts;
       posts.sort((a, b) => new Date(b.date) - new Date(a.date));
       hideLoader();
-      filterPosts(window.location.hash.replace('#', '') || 'beranda', false);
+      filterPosts(window.location.hash.replace('#', '') || 'all', false);
       return;
     }
 
@@ -78,7 +78,7 @@ async function loadAllPosts() {
     console.error("Gagal load post:", err);
   } finally {
     hideLoader();
-    filterPosts(window.location.hash.replace('#', '') || 'beranda', false);
+    filterPosts(window.location.hash.replace('#', '') || 'all', false);
   }
 }
 
@@ -163,10 +163,15 @@ function setActiveMenu(genre) {
 function filterPosts(genre, save = true) {
   showLoader();
   setTimeout(() => {
-    if (genre === 'all' || genre === 'beranda') {
+    if (!genre || genre === 'all' || genre === 'beranda') {
       filteredPosts = posts;
     } else {
       filteredPosts = posts.filter(post => post.genre && post.genre.toLowerCase() === genre.toLowerCase());
+
+      if (filteredPosts.length === 0) {
+        console.warn(`Genre "${genre}" tidak ditemukan. Menampilkan semua post.`);
+        filteredPosts = posts;
+      }
     }
 
     currentPage = 1;
@@ -339,7 +344,7 @@ if ('serviceWorker' in navigator && 'SyncManager' in window) {
 }
 
 window.addEventListener('hashchange', () => {
-  filterPosts(window.location.hash.replace('#', '') || 'beranda', false);
+  filterPosts(window.location.hash.replace('#', '') || 'all', false);
 });
 
 window.addEventListener('load', async () => {
