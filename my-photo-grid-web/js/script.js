@@ -43,7 +43,6 @@ async function loadAllPosts() {
     const cachedVersion = localStorage.getItem('indexVersion');
 
     if (cachedVersion !== lastModified) {
-      await clearCache(db);
       localStorage.setItem('indexVersion', lastModified);
     }
 
@@ -51,16 +50,15 @@ async function loadAllPosts() {
 
     if (cachedPosts && cachedPosts.length) {
       posts = cachedPosts;
-      posts.sort((a, b) => new Date(b.date) - new Date(a.date));
-      hideLoader();
-      filterPosts(window.location.hash.replace('#', '') || 'beranda', false);
-      return;
     }
 
     let loadedCount = 0;
 
     for (let i = indexData.files.length - 1; i >= 0; i--) {
       const entry = indexData.files[i];
+
+      if (await isPostCached(db, entry.file)) continue;
+
       const filePath = `data/${entry.file}`;
       const res = await fetch(filePath);
       if (res.ok) {
@@ -80,6 +78,16 @@ async function loadAllPosts() {
     hideLoader();
     filterPosts(window.location.hash.replace('#', '') || 'beranda', false);
   }
+}
+
+function isPostCached(db, id) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('posts', 'readonly');
+    const store = tx.objectStore('posts');
+    const request = store.get(id);
+    request.onsuccess = () => resolve(!!request.result);
+    request.onerror = () => reject('Gagal cek post cache');
+  });
 }
 
 function getCurrentPagePosts() {
@@ -294,22 +302,11 @@ function getCachedPosts(db) {
   });
 }
 
-function clearCache(db) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction('posts', 'readwrite');
-    const store = tx.objectStore('posts');
-    const request = store.clear();
-    request.onsuccess = () => resolve();
-    request.onerror = () => reject('Gagal hapus cache');
-  });
-}
-
 // Update Handler
 function updateContent() {
   location.reload();
 }
 
-// Tombol Refresh Manual
 function manualRefresh() {
   location.reload();
 }
