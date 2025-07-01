@@ -37,25 +37,6 @@ async function loadAllPosts() {
   try {
     const indexRes = await fetch('data/index.json', { cache: 'no-store' });
     const indexData = await indexRes.json();
-    const lastModified = indexData.lastModified;
-
-    const db = await openDB();
-    const cachedVersion = localStorage.getItem('indexVersion');
-
-    if (cachedVersion !== lastModified) {
-      await clearCache(db);
-      localStorage.setItem('indexVersion', lastModified);
-    }
-
-    const cachedPosts = await getCachedPosts(db);
-
-    if (cachedPosts && cachedPosts.length) {
-      posts = cachedPosts;
-      posts.sort((a, b) => new Date(b.date) - new Date(a.date));
-      hideLoader();
-      filterPosts(window.location.hash.replace('#', '') || 'beranda', false);
-      return;
-    }
 
     let loadedCount = 0;
 
@@ -66,7 +47,6 @@ async function loadAllPosts() {
       if (res.ok) {
         const post = await res.json();
         posts.push(post);
-        await savePost(db, post);
         loadedCount++;
         const progress = Math.floor((loadedCount / indexData.files.length) * 100);
         updateProgress(progress);
@@ -74,11 +54,11 @@ async function loadAllPosts() {
     }
 
     posts.sort((a, b) => new Date(b.date) - new Date(a.date));
-    hideLoader();
-    filterPosts(window.location.hash.replace('#', '') || 'beranda', false);
   } catch (err) {
     console.error("Gagal load post:", err);
+  } finally {
     hideLoader();
+    filterPosts(window.location.hash.replace('#', '') || 'beranda', false);
   }
 }
 
@@ -257,85 +237,6 @@ function outsideClickListener(event) {
   if (!menu.contains(event.target) && !hamburger.contains(event.target)) {
     closeMenu();
   }
-}
-
-function openDB() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open('KeylapoiDB', 1);
-    request.onerror = () => reject('Gagal buka database');
-    request.onsuccess = () => resolve(request.result);
-    request.onupgradeneeded = function (e) {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains('posts')) {
-        db.createObjectStore('posts', { keyPath: 'id' });
-      }
-    };
-  });
-}
-
-function savePost(db, post) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction('posts', 'readwrite');
-    const store = tx.objectStore('posts');
-    store.put(post);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject('Gagal simpan post');
-  });
-}
-
-function getCachedPosts(db) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction('posts', 'readonly');
-    const store = tx.objectStore('posts');
-    const request = store.getAll();
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject('Gagal ambil post dari cache');
-  });
-}
-
-function clearCache(db) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction('posts', 'readwrite');
-    const store = tx.objectStore('posts');
-    const request = store.clear();
-    request.onsuccess = () => resolve();
-    request.onerror = () => reject('Gagal hapus cache');
-  });
-}
-
-function updateContent() {
-  location.reload();
-}
-
-const updateWorker = new Worker('js/worker.js');
-updateWorker.postMessage('start');
-
-updateWorker.onmessage = function (e) {
-  if (e.data === 'update') {
-    checkForUpdates();
-  }
-};
-
-async function checkForUpdates() {
-  try {
-    const response = await fetch('data/index.json', { cache: "no-store" });
-    const indexData = await response.json();
-    const newVersion = indexData.lastModified;
-
-    const oldVersion = localStorage.getItem('indexVersion');
-
-    if (newVersion !== oldVersion) {
-      document.getElementById('updateNotice').style.display = 'block';
-    }
-  } catch (err) {
-    console.error('Gagal cek update:', err);
-  }
-}
-
-if ('serviceWorker' in navigator && 'SyncManager' in window) {
-  navigator.serviceWorker.ready.then(swRegistration => {
-    swRegistration.sync.register('sync-update').catch(err => console.error('Gagal register sync:', err));
-  });
 }
 
 window.addEventListener('hashchange', () => {
