@@ -71,14 +71,22 @@ async function loadAllPosts() {
       const entry = indexData.files[i];
 
       const alreadyDownloaded = await isAlreadyDownloaded(entry.file);
-
       if (!alreadyDownloaded) {
         const filePath = `data/${entry.file}`;
         const res = await fetch(filePath);
         if (res.ok) {
-          const post = await res.json();
-          posts.push(post);
-          await savePost(db, post);
+          const json = await res.json();
+          if (Array.isArray(json)) {
+            for (const post of json) {
+              if (post && post.id && post.image && post.title) {
+                posts.push(post);
+                await savePost(db, post);
+              }
+            }
+          } else if (json && json.id && json.image && json.title) {
+            posts.push(json);
+            await savePost(db, json);
+          }
           await updateDownloadLog(entry.file);
           loadedCount++;
           const progress = Math.floor((loadedCount / indexData.files.length) * 100);
@@ -278,6 +286,7 @@ function outsideClickListener(event) {
   }
 }
 
+// IndexedDB
 function openDB() {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open('KeylapoiDB_v2', 1);
