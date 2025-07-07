@@ -1,25 +1,28 @@
-self.onmessage = function (e) {
-  if (e.data === 'start') {
-    let lastKnownVersion = null;
+const GENRES = [ 'asia', 'jav', 'local', 'local_random', 'asia_random', 'barat', 'barat_random' ];
 
-    async function checkUpdate() {
-      try {
-        const response = await fetch('data/index.json', { cache: 'no-store' });
-        if (!response.ok) return;
+self.onmessage = function (e) { if (e.data === 'start') { let lastVersions = {};
 
-        const data = await response.json();
-        const currentVersion = data.lastModified;
+async function checkUpdate() {
+  try {
+    for (let genre of GENRES) {
+      const response = await fetch(`data/index.${genre}.json`, { cache: 'no-store' });
+      if (!response.ok) continue;
 
-        if (lastKnownVersion && currentVersion !== lastKnownVersion) {
-          postMessage('update');
-        }
+      const data = await response.json();
+      const currentVersion = data.lastModified;
 
-        lastKnownVersion = currentVersion;
-      } catch (err) {
-        console.error('Worker gagal cek update:', err);
+      if (lastVersions[genre] && currentVersion !== lastVersions[genre]) {
+        postMessage('update');
       }
-    }
 
-    setInterval(checkUpdate, 15000);
+      lastVersions[genre] = currentVersion;
+    }
+  } catch (err) {
+    console.error('Worker gagal cek update:', err);
   }
-};
+}
+
+setInterval(checkUpdate, 15000);
+
+} };
+
