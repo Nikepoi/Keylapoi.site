@@ -1,7 +1,13 @@
 {
-  "lastModified": "2025-07-07T00:00:00Z",
+  "lastModified": "2025-07-07T12:01:39Z",
   "files": [
-    { "file": "barat/1.json", "version": "2" },
-    { "file": "barat/2.json", "version": "2" }
+    {
+      "file": "barat/1.json",
+      "version": "2"
+    },
+    {
+      "file": "barat/2.json",
+      "version": "2"
+    }
   ]
 }
