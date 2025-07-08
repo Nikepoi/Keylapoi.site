@@ -1,5 +1,5 @@
-const STATIC_CACHE = 'keylapoi-static-v3';
-const DATA_CACHE = 'keylapoi-data-v3';
+const STATIC_CACHE = 'keylapoi-static-v4';
+const DATA_CACHE = 'keylapoi-data-v4';
 
 const urlsToCache = [
   '/',
@@ -35,11 +35,19 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   if (event.request.url.includes('/data/')) {
-    return fetch(event.request).then(response => response).catch(() => caches.match(event.request));
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
   }
 
   event.respondWith(
-    caches.match(event.request).then(response => response || fetch(event.request))
+    caches.match(event.request)
+      .then(response => response || fetch(event.request))
   );
 });
 
