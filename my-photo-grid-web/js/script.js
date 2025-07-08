@@ -3,8 +3,9 @@ let filteredPosts = [];
 let currentPage = 1;
 const postsPerPage = 20;
 
-const STATIC_CACHE_NAME = 'keylapoi-static-v3';
-const DATA_CACHE_NAME = 'keylapoi-data-v3';
+const STATIC_CACHE_NAME = 'keylapoi-static-v4';
+const DATA_CACHE_NAME = 'keylapoi-data-v4';
+const DB_NAME = 'KeylapoiDB_v23';
 const GENRES = ['asia', 'jav', 'local', 'local_random', 'asia_random', 'barat', 'barat_random'];
 
 function decodeUrl(encodedUrl) {
@@ -69,7 +70,6 @@ async function loadAllPosts() {
 
     for (let i = indexData.files.length - 1; i >= 0; i--) {
       const entry = indexData.files[i];
-
       const alreadyDownloaded = await isAlreadyDownloaded(entry.file);
       if (!alreadyDownloaded) {
         const filePath = `data/${entry.file}`;
@@ -136,7 +136,6 @@ function displayPosts(postsToShow) {
 
 function renderLinks(label, links) {
   let html = `<h4>Download via ${label}</h4><ul>`;
-
   if (Array.isArray(links)) {
     links.forEach((link, i) => {
       html += `<li><a class="download-button" href="${decodeUrl(link)}" target="_blank">${label} ${i + 1}</a></li>`;
@@ -144,7 +143,6 @@ function renderLinks(label, links) {
   } else if (typeof links === 'string' && links.trim() !== '') {
     html += `<li><a class="download-button" href="${decodeUrl(links)}" target="_blank">Full Konten</a></li>`;
   }
-
   html += `</ul>`;
   return html;
 }
@@ -190,21 +188,16 @@ function setActiveMenu(genre) {
 function filterPosts(genre, save = true) {
   showLoader();
   setTimeout(() => {
-    if (genre === 'all' || genre === 'beranda') {
-      filteredPosts = posts;
-    } else {
-      filteredPosts = posts.filter(post => post.genre && post.genre.toLowerCase() === genre.toLowerCase());
-    }
+    filteredPosts = genre === 'all' || genre === 'beranda'
+      ? posts
+      : posts.filter(post => post.genre?.toLowerCase() === genre.toLowerCase());
 
     currentPage = 1;
     displayPosts(getCurrentPagePosts());
     updatePagination();
     hideLoader();
 
-    if (save) {
-      window.location.hash = genre === 'all' ? 'beranda' : genre;
-    }
-
+    if (save) window.location.hash = genre === 'all' ? 'beranda' : genre;
     setActiveMenu(genre);
     closeMenu();
     scrollToTop();
@@ -214,8 +207,7 @@ function filterPosts(genre, save = true) {
 function nextPage() {
   showLoader();
   setTimeout(() => {
-    const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
-    if (currentPage < totalPages) {
+    if (currentPage < Math.ceil(filteredPosts.length / postsPerPage)) {
       currentPage++;
       displayPosts(getCurrentPagePosts());
       updatePagination();
@@ -247,18 +239,14 @@ function toggleMenu() {
   const hamburger = document.querySelector('.hamburger');
 
   if (menu.classList.contains('active')) {
-    menu.style.transformOrigin = 'top right';
     menu.style.transform = 'scale(0)';
     menu.style.opacity = '0';
     hamburger.classList.remove('is-active');
-    setTimeout(() => { menu.classList.remove('active'); }, 300);
+    setTimeout(() => menu.classList.remove('active'), 300);
   } else {
     menu.classList.add('active');
-    menu.style.transformOrigin = 'top right';
-    setTimeout(() => {
-      menu.style.transform = 'scale(1)';
-      menu.style.opacity = '1';
-    }, 10);
+    menu.style.transform = 'scale(1)';
+    menu.style.opacity = '1';
     hamburger.classList.add('is-active');
     document.addEventListener('click', outsideClickListener);
   }
@@ -269,11 +257,10 @@ function closeMenu() {
   const hamburger = document.querySelector('.hamburger');
 
   if (menu.classList.contains('active')) {
-    menu.style.transformOrigin = 'top right';
     menu.style.transform = 'scale(0)';
     menu.style.opacity = '0';
     hamburger.classList.remove('is-active');
-    setTimeout(() => { menu.classList.remove('active'); }, 300);
+    setTimeout(() => menu.classList.remove('active'), 300);
     document.removeEventListener('click', outsideClickListener);
   }
 }
@@ -286,10 +273,9 @@ function outsideClickListener(event) {
   }
 }
 
-// IndexedDB
 function openDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('KeylapoiDB_v2', 1);
+    const request = indexedDB.open(DB_NAME, 1);
     request.onerror = () => reject('Gagal buka database');
     request.onsuccess = () => resolve(request.result);
     request.onupgradeneeded = function (e) {
@@ -332,9 +318,7 @@ function manualRefresh() {
 const updateWorker = new Worker('js/worker.js');
 updateWorker.postMessage('start');
 updateWorker.onmessage = function (e) {
-  if (e.data === 'update') {
-    location.reload();
-  }
+  if (e.data === 'update') location.reload();
 };
 
 if ('serviceWorker' in navigator && 'SyncManager' in window) {
