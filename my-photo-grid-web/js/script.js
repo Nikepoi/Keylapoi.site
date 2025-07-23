@@ -126,10 +126,17 @@ function displayPosts(postsToShow) {
     const img = document.createElement('img');
     img.src = post.image;
     img.alt = post.title;
-    img.loading = "lazy";
-    img.onclick = () => showOverlay(post);
+
+    const slug = post.title.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
+    img.addEventListener('click', () => {
+      window.open(`post.html?title=${slug}`, '_blank');
+    });
+
+    const title = document.createElement('p');
+    title.textContent = post.title;
 
     postElement.appendChild(img);
+    postElement.appendChild(title);
     gridContainer.appendChild(postElement);
   });
 }
@@ -145,28 +152,6 @@ function renderLinks(label, links) {
   }
   html += `</ul>`;
   return html;
-}
-
-function showOverlay(post) {
-  const overlay = document.getElementById('overlay');
-  const content = document.getElementById('overlayContent');
-
-  let html = `<img src="${post.image}" alt="${post.title}" style="width: 100%; height: auto; max-height: 60vh; object-fit: contain;" />
-    <h3>${post.title}</h3>`;
-
-  if (post.links?.videy) html += renderLinks('Videy', post.links.videy);
-  if (post.links?.terabox) html += renderLinks('Terabox', post.links.terabox);
-  if (post.links?.mediafire) html += renderLinks('Mediafire', post.links.mediafire);
-  if (post.links?.pixeldrain) html += renderLinks('PixelDrain', post.links.pixeldrain);
-
-  content.innerHTML = html;
-  overlay.style.display = "flex";
-}
-
-function closeOverlay(event) {
-  if (event.target.id === "overlay" || event.target.classList.contains("close-btn")) {
-    document.getElementById('overlay').style.display = "none";
-  }
 }
 
 function updatePagination() {
