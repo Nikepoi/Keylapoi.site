@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post Detail - Keylapoi</title>
+    <meta name="author" content="Keylapoi">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .post {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .post-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        .post-links h4 {
+            margin-top: 15px;
+            color: #333;
+        }
+        .post-links ul {
+            list-style: none;
+            padding: 0;
+        }
+        .post-links a {
+            color: #007bff;
+            text-decoration: none;
+            margin-right: 10px;
+            padding: 5px 10px;
+            border: 1px solid #007bff;
+            border-radius: 3px;
+            display: inline-block;
+        }
+        .post-links a:hover {
+            background-color: #007bff;
+            color: #fff;
+        }
+        .back-btn {
+            padding: 8px 12px;
+            background-color: #dc3545;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .back-btn:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="post" id="postDetail"></div>
+    <button class="back-btn" onclick="window.history.back()">Kembali</button>
+
+    <script>
+        // Ambil parameter dari URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const titleSlug = urlParams.get('title');
+
+        // Fungsi decode (pake dari kode lo)
+        function decodeUrl(encodedUrl) {
+            try {
+                const decoded = atob(encodedUrl);
+                const url = new URL(decoded);
+                const hostname = url.hostname;
+                const targetDomains = ['videy.co', 'mediafire', 'terabox', 'pixeldrain'];
+                const isTarget = targetDomains.some(domain => hostname.includes(domain));
+                return isTarget ? `https://www.keylapoi.site/safelink.html?url=${encodedUrl}` : decoded;
+            } catch (e) {
+                console.error("Gagal decode:", encodedUrl);
+                return "#";
+            }
+        }
+
+        // Render link berdasarkan label dan array link
+        function renderLinks(label, links) {
+            let html = `<h4>Download via ${label}</h4><ul>`;
+            if (Array.isArray(links)) {
+                links.forEach((link, i) => {
+                    html += `<li><a href="${decodeUrl(link)}" target="_blank">${label} ${i + 1}</a></li>`;
+                });
+            } else if (typeof links === 'string' && links.trim() !== '') {
+                html += `<li><a href="${decodeUrl(links)}" target="_blank">Full Konten</a></li>`;
+            }
+            html += `</ul>`;
+            return html || '';
+        }
+
+        // Fungsi buat load post dari IndexedDB
+        async function loadPostFromDB() {
+            const db = await openDB();
+            const tx = db.transaction('posts', 'readonly');
+            const store = tx.objectStore('posts');
+            const request = store.getAll();
+            return new Promise((resolve) => {
+                request.onsuccess = () => resolve(request.result);
+            });
+        }
+
+        // Tampilin post
+        async function displayPost() {
+            const allPosts = await loadPostFromDB();
+            const post = allPosts.find(p => {
+                const slug = p.title.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
+                return slug === titleSlug;
+            });
+
+            if (post) {
+                document.getElementById('postDetail').innerHTML = `
+                    <h1>${post.title}</h1>
+                    <img src="${post.image}" alt="${post.title}" class="post-image">
+                    <p>Date: ${new Date(post.date).toLocaleDateString('id-ID')}</p>
+                    <div class="post-links">
+                        ${renderLinks('Videy', post.links.videy)}
+                        ${renderLinks('Pixeldrain', post.links.pixeldrain)}
+                        ${post.links.mediafire.length ? renderLinks('Mediafire', post.links.mediafire) : ''}
+                        ${post.links.terabox.length ? renderLinks('Terabox', post.links.terabox) : ''}
+                        ${post.links.bonus.length ? renderLinks('Bonus', post.links.bonus) : ''}
+                    </div>
+                `;
+            } else {
+                document.getElementById('postDetail').innerHTML = '<h1>Post tidak ditemukan</h1>';
+            }
+        }
+
+        // Fungsi openDB (copy dari kode lo)
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open('KeylapoiDB_v23', 1);
+                request.onerror = () => reject('Gagal buka database');
+                request.onsuccess = () => resolve(request.result);
+                request.onupgradeneeded = function (e) {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('posts')) {
+                        db.createObjectStore('posts', { keyPath: 'id' });
+                    }
+                };
+            });
+        }
+
+        // Panggil fungsi saat load
+        window.addEventListener('load', async () => {
+            await displayPost();
+        });
+    </script>
+</body>
+  </html>
