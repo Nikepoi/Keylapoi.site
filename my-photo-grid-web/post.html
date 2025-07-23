@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Loading...</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #111;
+      color: #fff;
+      padding: 20px;
+    }
+    img {
+      max-width: 100%;
+      border-radius: 12px;
+      margin: 20px 0;
+    }
+    .download {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #00ff99;
+      color: #000;
+      font-weight: bold;
+      border-radius: 8px;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="post">Loading...</div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const id = params.get("id");
+    const genre = params.get("genre");
+
+    if (!id || !genre) {
+      document.getElementById("post").innerText = "Parameter tidak lengkap.";
+    } else {
+      fetch(`/my-photo-grid-web/data/${genre}/${id}.json`)
+        .then(res => {
+          if (!res.ok) throw new Error("Postingan tidak ditemukan");
+          return res.json();
+        })
+        .then(data => {
+          document.title = data.judul || "Detail Post";
+
+          document.getElementById("post").innerHTML = `
+            <h1>${data.judul}</h1>
+            <p><strong>Genre:</strong> ${data.genre || genre}</p>
+            <img src="${data.foto}" alt="Gambar">
+            <br />
+            <a class="download" href="${data.link}" target="_blank">Download</a>
+          `;
+        })
+        .catch(err => {
+          document.getElementById("post").innerText = err.message;
+        });
+    }
+  </script>
+</body>
+</html>
