@@ -69,9 +69,9 @@
     <button class="back-btn" onclick="window.history.back()">Kembali</button>
 
     <script>
-        // Ambil parameter dari URL
+        // Ambil parameter id dari URL
         const urlParams = new URLSearchParams(window.location.search);
-        const titleSlug = urlParams.get('title');
+        const postId = parseInt(urlParams.get('id')); // Ambil id sebagai integer
 
         // Fungsi decode (pake dari kode lo)
         function decodeUrl(encodedUrl) {
@@ -102,12 +102,12 @@
             return html || '';
         }
 
-        // Fungsi buat load post dari IndexedDB
-        async function loadPostFromDB() {
+        // Fungsi buat load post dari IndexedDB berdasarkan id
+        async function loadPostFromDB(id) {
             const db = await openDB();
             const tx = db.transaction('posts', 'readonly');
             const store = tx.objectStore('posts');
-            const request = store.getAll();
+            const request = store.get(id); // Ambil berdasarkan id
             return new Promise((resolve) => {
                 request.onsuccess = () => resolve(request.result);
             });
@@ -115,11 +115,7 @@
 
         // Tampilin post
         async function displayPost() {
-            const allPosts = await loadPostFromDB();
-            const post = allPosts.find(p => {
-                const slug = p.title.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
-                return slug === titleSlug;
-            });
+            const post = await loadPostFromDB(postId);
 
             if (post) {
                 document.getElementById('postDetail').innerHTML = `
@@ -156,8 +152,12 @@
 
         // Panggil fungsi saat load
         window.addEventListener('load', async () => {
-            await displayPost();
+            if (isNaN(postId)) {
+                document.getElementById('postDetail').innerHTML = '<h1>ID tidak valid</h1>';
+            } else {
+                await displayPost();
+            }
         });
     </script>
 </body>
-  </html>
+</html>
