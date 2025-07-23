@@ -1,30 +1,54 @@
-const urlParams = new URLSearchParams(window.location.search);
-const judulDicari = urlParams.get("judul");
+const params = new URLSearchParams(window.location.search);
+const id = params.get("id");
 
-const totalFiles = 1000;
-let ditemukan = false;
+if (!id) {
+  document.body.innerHTML = "<h1>ID tidak ditemukan di URL.</h1>";
+} else {
+  fetch(`${id}.json`)
+    .then(res => res.json())
+    .then(data => {
+      document.title = data.title;
+      document.getElementById("post-title").textContent = data.title;
+      document.getElementById("genre").textContent = "Genre: " + data.genre;
+      document.getElementById("image").src = data.image;
 
-async function cariDanTampilkan() {
-  for (let i = 1; i <= totalFiles; i++) {
-    try {
-      const res = await fetch(`${i}.json`);
-      const data = await res.json();
+      let linkDiv = document.getElementById("links");
 
-      if (data.title === judulDicari) {
-        document.getElementById("title").textContent = data.title;
-        document.getElementById("genre").textContent = `Genre: ${data.genre}`;
-        document.getElementById("content").innerHTML = data.content;
-        ditemukan = true;
-        break;
+      if (data.videy) {
+        data.videy.forEach(link => {
+          const a = document.createElement("a");
+          a.href = atob(link);
+          a.textContent = "Download via Videy";
+          a.target = "_blank";
+          linkDiv.appendChild(a);
+          linkDiv.appendChild(document.createElement("br"));
+        });
       }
-    } catch (e) {
-      console.warn(`Gagal fetch ${i}.json`);
-    }
-  }
 
-  if (!ditemukan) {
-    document.getElementById("title").textContent = "Judul tidak ditemukan.";
-  }
+      if (data.mediafire) {
+        data.mediafire.forEach(link => {
+          const a = document.createElement("a");
+          a.href = atob(link);
+          a.textContent = "Download via MediaFire";
+          a.target = "_blank";
+          linkDiv.appendChild(a);
+          linkDiv.appendChild(document.createElement("br"));
+        });
+      }
+
+      if (data.terabox) {
+        data.terabox.forEach(link => {
+          const a = document.createElement("a");
+          a.href = atob(link);
+          a.textContent = "Download via Terabox";
+          a.target = "_blank";
+          linkDiv.appendChild(a);
+          linkDiv.appendChild(document.createElement("br"));
+        });
+      }
+    })
+    .catch(err => {
+      document.body.innerHTML = "<h1>Gagal memuat data.</h1>";
+      console.error(err);
+    });
 }
-
-cariDanTampilkan();
