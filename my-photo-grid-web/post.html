@@ -1,0 +1,124 @@
+<!-- FILE: post.html --><!DOCTYPE html><html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memuat Postingan...</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      background: #111;
+      color: #fff;
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+    }
+    img {
+      width: 100%;
+      border-radius: 12px;
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+    .genre {
+      color: #aaa;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+    .download-button {
+      display: inline-block;
+      margin: 8px 4px;
+      padding: 10px 15px;
+      background-color: #333;
+      color: #fff;
+      border-radius: 6px;
+      text-decoration: none;
+    }
+    .download-button:hover {
+      background-color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 id="post-title">Memuat...</h1>
+    <div class="genre" id="post-genre"></div>
+    <img id="post-img" src="" alt="Gambar" />
+    <div id="post-links"></div>
+  </div>  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const titleParam = urlParams.get('judul')?.toLowerCase().replace(/-/g, ' ');
+
+    async function getPostFromDB(judul) {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open('KeylapoiDB_v23', 1);
+        request.onerror = () => reject('Gagal buka DB');
+        request.onsuccess = () => {
+          const db = request.result;
+          const tx = db.transaction('posts', 'readonly');
+          const store = tx.objectStore('posts');
+          const all = store.getAll();
+          all.onsuccess = () => {
+            const result = all.result.find(p => p.title?.toLowerCase() === judul);
+            resolve(result);
+          };
+          all.onerror = () => reject('Gagal ambil data');
+        };
+      });
+    }
+
+    function decodeUrl(encodedUrl) {
+      try {
+        const decoded = atob(encodedUrl);
+        const url = new URL(decoded);
+        const targetDomains = ['videy.co', 'mediafire', 'terabox', 'pixeldrain'];
+        const isTarget = targetDomains.some(domain => url.hostname.includes(domain));
+        return isTarget ? `https://www.keylapoi.site/safelink.html?url=${encodedUrl}` : decoded;
+      } catch {
+        return '#';
+      }
+    }
+
+    function renderLinks(label, links) {
+      let html = `<h4>Download via ${label}</h4><ul>`;
+      if (Array.isArray(links)) {
+        links.forEach((link, i) => {
+          html += `<li><a class="download-button" href="${decodeUrl(link)}" target="_blank">${label} ${i + 1}</a></li>`;
+        });
+      } else if (typeof links === 'string' && links.trim() !== '') {
+        html += `<li><a class="download-button" href="${decodeUrl(links)}" target="_blank">${label}</a></li>`;
+      }
+      html += '</ul>';
+      return html;
+    }
+
+    async function loadPost() {
+      if (!titleParam) {
+        document.getElementById('post-title').innerText = 'Judul tidak ditemukan';
+        return;
+      }
+
+      const post = await getPostFromDB(titleParam);
+      if (!post) {
+        document.getElementById('post-title').innerText = 'Postingan tidak ditemukan';
+        return;
+      }
+
+      document.title = post.title;
+      document.getElementById('post-title').innerText = post.title;
+      document.getElementById('post-genre').innerText = post.genre || '';
+      document.getElementById('post-img').src = post.image;
+
+      const linksEl = document.getElementById('post-links');
+      if (post.links?.videy) linksEl.innerHTML += renderLinks('Videy', post.links.videy);
+      if (post.links?.terabox) linksEl.innerHTML += renderLinks('Terabox', post.links.terabox);
+      if (post.links?.mediafire) linksEl.innerHTML += renderLinks('Mediafire', post.links.mediafire);
+      if (post.links?.pixeldrain) linksEl.innerHTML += renderLinks('PixelDrain', post.links.pixeldrain);
+    }
+
+    loadPost();
+  </script></body>
+      </html>
