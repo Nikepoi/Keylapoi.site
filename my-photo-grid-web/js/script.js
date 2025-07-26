@@ -22,29 +22,41 @@ function decodeUrl(encodedUrl) {
 }
 
 function showLoader() {
-  document.getElementById('blur-loader').style.display = 'flex';
+  const loader = document.getElementById('blur-loader');
+  if (loader) loader.style.display = 'flex';
 }
 
 function hideLoader() {
-  document.getElementById('blur-loader').style.display = 'none';
+  const loader = document.getElementById('blur-loader');
+  if (loader) loader.style.display = 'none';
 }
 
 function updateProgress(progress) {
-  document.getElementById('progressText').innerText = `${progress}%`;
+  const progressText = document.getElementById('progressText');
+  if (progressText) progressText.innerText = `${progress}%`;
 }
 
 async function updateDownloadLog(fileName) {
-  const cache = await caches.open(DATA_CACHE_NAME);
-  const logRequest = new Request(`/log/${fileName}`);
-  const logResponse = new Response(JSON.stringify({ downloaded: true }), { headers: { 'Content-Type': 'application/json' } });
-  await cache.put(logRequest, logResponse);
+  try {
+    const cache = await caches.open(DATA_CACHE_NAME);
+    const logRequest = new Request(`/log/${fileName}`);
+    const logResponse = new Response(JSON.stringify({ downloaded: true }), { headers: { 'Content-Type': 'application/json' } });
+    await cache.put(logRequest, logResponse);
+  } catch (e) {
+    console.error('Failed to update download log:', e);
+  }
 }
 
 async function isAlreadyDownloaded(fileName) {
-  const cache = await caches.open(DATA_CACHE_NAME);
-  const logRequest = new Request(`/log/${fileName}`);
-  const response = await cache.match(logRequest);
-  return !!response;
+  try {
+    const cache = await caches.open(DATA_CACHE_NAME);
+    const logRequest = new Request(`/log/${fileName}`);
+    const response = await cache.match(logRequest);
+    return !!response;
+  } catch (e) {
+    console.error('Failed to check download log:', e);
+    return false;
+  }
 }
 
 async function loadAllPosts() {
@@ -57,9 +69,14 @@ async function loadAllPosts() {
     let indexData = { files: [] };
 
     for (let genre of GENRES) {
-      const res = await fetch(`data/index.${genre}.json`, { cache: 'no-store' });
-      const data = await res.json();
-      indexData.files = indexData.files.concat(data.files);
+      try {
+        const res = await fetch(`data/index.${genre}.json`, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`Failed to fetch index.${genre}.json`);
+        const data = await res.json();
+        indexData.files = indexData.files.concat(data.files);
+      } catch (e) {
+        console.error(`Error loading genre ${genre}:`, e);
+      }
     }
 
     const lastModified = new Date().toISOString();
@@ -72,9 +89,10 @@ async function loadAllPosts() {
 
       const alreadyDownloaded = await isAlreadyDownloaded(entry.file);
       if (!alreadyDownloaded) {
-        const filePath = `data/${entry.file}`;
-        const res = await fetch(filePath);
-        if (res.ok) {
+        try {
+          const filePath = `data/${entry.file}`;
+          const res = await fetch(filePath);
+          if (!res.ok) throw new Error(`Failed to fetch ${filePath}`);
           const json = await res.json();
           if (Array.isArray(json)) {
             for (const post of json) {
@@ -91,6 +109,8 @@ async function loadAllPosts() {
           loadedCount++;
           const progress = Math.floor((loadedCount / indexData.files.length) * 100);
           updateProgress(progress);
+        } catch (e) {
+          console.error(`Error loading file ${entry.file}:`, e);
         }
       }
     }
@@ -101,11 +121,24 @@ async function loadAllPosts() {
       posts.sort((a, b) => new Date(b.date) - new Date(a.date));
     }
 
+    if (posts.length === 0) {
+      console.warn('No posts loaded, displaying fallback message');
+      const grid = document.getElementById('postGrid');
+      if (grid) {
+        grid.innerHTML = '<p style="text-align: center; color: #fff;">No content available. Please try refreshing.</p>';
+      }
+    }
+
   } catch (err) {
     console.error("Gagal load post:", err);
   } finally {
     hideLoader();
     filterPosts(window.location.hash.replace('#', '') || 'beranda', false);
+    try {
+      AOS.refresh();
+    } catch (e) {
+      console.error('AOS refresh failed:', e);
+    }
   }
 }
 
@@ -117,11 +150,17 @@ function getCurrentPagePosts() {
 
 function displayPosts(postsToShow) {
   const gridContainer = document.getElementById('postGrid');
+  if (!gridContainer) {
+    console.error('Grid container not found');
+    return;
+  }
   gridContainer.innerHTML = '';
 
-  postsToShow.forEach(post => {
+  postsToShow.forEach((post, index) => {
     const postElement = document.createElement('div');
     postElement.classList.add('grid-item');
+    postElement.setAttribute('data-aos', 'fade-up');
+    postElement.setAttribute('data-aos-delay', (index * 100).toString());
 
     const img = document.createElement('img');
     img.src = post.image;
@@ -132,6 +171,26 @@ function displayPosts(postsToShow) {
     postElement.appendChild(img);
     gridContainer.appendChild(postElement);
   });
+
+  try {
+    AOS.refresh();
+    // GSAP dan IntersectionObserver (opsional)
+    document.querySelectorAll('.grid-item').forEach((el, index) => {
+      observer.observe(el);
+      el.addEventListener('aos:in', () => {
+        if (typeof gsap !== 'undefined') {
+          gsap.to(el, {
+            duration: 0.8,
+            y: -20,
+            opacity: 1,
+            ease: 'bounce.out',
+          });
+        }
+      });
+    });
+  } catch (e) {
+    console.error('Error refreshing AOS or observing grid items:', e);
+  }
 }
 
 function renderLinks(label, links) {
@@ -153,6 +212,11 @@ function showOverlay(post) {
   const overlay = document.getElementById('overlay');
   const content = document.getElementById('overlayContent');
 
+  if (!overlay || !content) {
+    console.error('Overlay or content not found');
+    return;
+  }
+
   let html = `<img src="${post.image}" alt="${post.title}" style="width: 100%; height: auto; max-height: 60vh; object-fit: contain;" />
     <h3>${post.title}</h3>`;
 
@@ -163,18 +227,26 @@ function showOverlay(post) {
 
   content.innerHTML = html;
   overlay.style.display = "flex";
+  try {
+    AOS.refresh();
+  } catch (e) {
+    console.error('AOS refresh in overlay failed:', e);
+  }
 }
 
 function closeOverlay(event) {
   if (event.target.id === "overlay" || event.target.classList.contains("close-btn")) {
-    document.getElementById('overlay').style.display = "none";
+    const overlay = document.getElementById('overlay');
+    if (overlay) overlay.style.display = "none";
   }
 }
 
 function updatePagination() {
   const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
-  document.getElementById('prevBtn').style.display = currentPage > 1 ? 'inline-block' : 'none';
-  document.getElementById('nextBtn').style.display = currentPage < totalPages ? 'inline-block' : 'none';
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  if (prevBtn) prevBtn.style.display = currentPage > 1 ? 'inline-block' : 'none';
+  if (nextBtn) nextBtn.style.display = currentPage < totalPages ? 'inline-block' : 'none';
 }
 
 function setActiveMenu(genre) {
@@ -190,51 +262,69 @@ function setActiveMenu(genre) {
 function filterPosts(genre, save = true) {
   showLoader();
   setTimeout(() => {
-    if (genre === 'all' || genre === 'beranda') {
-      filteredPosts = posts;
-    } else {
-      filteredPosts = posts.filter(post => post.genre && post.genre.toLowerCase() === genre.toLowerCase());
+    try {
+      if (genre === 'all' || genre === 'beranda') {
+        filteredPosts = posts;
+      } else {
+        filteredPosts = posts.filter(post => post.genre && post.genre.toLowerCase() === genre.toLowerCase());
+      }
+
+      currentPage = 1;
+      displayPosts(getCurrentPagePosts());
+      updatePagination();
+      hideLoader();
+
+      if (save) {
+        window.location.hash = genre === 'all' ? 'beranda' : genre;
+      }
+
+      setActiveMenu(genre);
+      closeMenu();
+      scrollToTop();
+      AOS.refresh();
+    } catch (e) {
+      console.error('Error filtering posts:', e);
+      hideLoader();
     }
-
-    currentPage = 1;
-    displayPosts(getCurrentPagePosts());
-    updatePagination();
-    hideLoader();
-
-    if (save) {
-      window.location.hash = genre === 'all' ? 'beranda' : genre;
-    }
-
-    setActiveMenu(genre);
-    closeMenu();
-    scrollToTop();
   }, 300);
 }
 
 function nextPage() {
   showLoader();
   setTimeout(() => {
-    const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
-    if (currentPage < totalPages) {
-      currentPage++;
-      displayPosts(getCurrentPagePosts());
-      updatePagination();
-      scrollToTop();
+    try {
+      const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+      if (currentPage < totalPages) {
+        currentPage++;
+        displayPosts(getCurrentPagePosts());
+        updatePagination();
+        scrollToTop();
+      }
+      hideLoader();
+      AOS.refresh();
+    } catch (e) {
+      console.error('Error navigating to next page:', e);
+      hideLoader();
     }
-    hideLoader();
   }, 300);
 }
 
 function prevPage() {
   showLoader();
   setTimeout(() => {
-    if (currentPage > 1) {
-      currentPage--;
-      displayPosts(getCurrentPagePosts());
-      updatePagination();
-      scrollToTop();
+    try {
+      if (currentPage > 1) {
+        currentPage--;
+        displayPosts(getCurrentPagePosts());
+        updatePagination();
+        scrollToTop();
+      }
+      hideLoader();
+      AOS.refresh();
+    } catch (e) {
+      console.error('Error navigating to previous page:', e);
+      hideLoader();
     }
-    hideLoader();
   }, 300);
 }
 
@@ -245,6 +335,11 @@ function scrollToTop() {
 function toggleMenu() {
   const menu = document.getElementById('navMenu');
   const hamburger = document.querySelector('.hamburger');
+
+  if (!menu || !hamburger) {
+    console.error('Menu or hamburger not found');
+    return;
+  }
 
   if (menu.classList.contains('active')) {
     menu.style.transformOrigin = 'top right';
@@ -261,12 +356,19 @@ function toggleMenu() {
     }, 10);
     hamburger.classList.add('is-active');
     document.addEventListener('click', outsideClickListener);
+    try {
+      AOS.refresh();
+    } catch (e) {
+      console.error('AOS refresh in menu failed:', e);
+    }
   }
 }
 
 function closeMenu() {
   const menu = document.getElementById('navMenu');
   const hamburger = document.querySelector('.hamburger');
+
+  if (!menu || !hamburger) return;
 
   if (menu.classList.contains('active')) {
     menu.style.transformOrigin = 'top right';
@@ -323,19 +425,30 @@ function getCachedPosts(db) {
 
 function updateContent() {
   location.reload();
-}
-
-function manualRefresh() {
-  location.reload();
-}
-
-const updateWorker = new Worker('js/worker.js');
-updateWorker.postMessage('start');
-updateWorker.onmessage = function (e) {
-  if (e.data === 'update') {
-    location.reload();
+  try {
+    AOS.refresh();
+  } catch (e) {
+    console.error('AOS refresh in updateContent failed:', e);
   }
-};
+}
+
+// GSAP dan IntersectionObserver (opsional)
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('animate-custom');
+      if (typeof gsap !== 'undefined') {
+        gsap.to(entry.target, {
+          duration: 0.8,
+          y: -20,
+          opacity: 1,
+          ease: 'bounce.out',
+        });
+      }
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1 });
 
 if ('serviceWorker' in navigator && 'SyncManager' in window) {
   navigator.serviceWorker.ready.then(swRegistration => {
@@ -348,5 +461,9 @@ window.addEventListener('hashchange', () => {
 });
 
 window.addEventListener('load', async () => {
-  await loadAllPosts();
+  try {
+    await loadAllPosts();
+  } catch (e) {
+    console.error('Load all posts failed:', e);
+  }
 });
