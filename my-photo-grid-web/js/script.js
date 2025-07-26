@@ -106,6 +106,7 @@ async function loadAllPosts() {
   } finally {
     hideLoader();
     filterPosts(window.location.hash.replace('#', '') || 'beranda', false);
+    AOS.refresh(); // Refresh AOS setelah load posts
   }
 }
 
@@ -119,9 +120,11 @@ function displayPosts(postsToShow) {
   const gridContainer = document.getElementById('postGrid');
   gridContainer.innerHTML = '';
 
-  postsToShow.forEach(post => {
+  postsToShow.forEach((post, index) => {
     const postElement = document.createElement('div');
     postElement.classList.add('grid-item');
+    postElement.setAttribute('data-aos', 'fade-up');
+    postElement.setAttribute('data-aos-delay', index * 100); // Staggered delay
 
     const img = document.createElement('img');
     img.src = post.image;
@@ -132,6 +135,10 @@ function displayPosts(postsToShow) {
     postElement.appendChild(img);
     gridContainer.appendChild(postElement);
   });
+
+  // Refresh AOS dan observe grid items
+  AOS.refresh();
+  document.querySelectorAll('.grid-item').forEach(el => observer.observe(el));
 }
 
 function renderLinks(label, links) {
@@ -163,6 +170,7 @@ function showOverlay(post) {
 
   content.innerHTML = html;
   overlay.style.display = "flex";
+  AOS.refresh(); // Refresh AOS saat overlay muncul
 }
 
 function closeOverlay(event) {
@@ -261,6 +269,7 @@ function toggleMenu() {
     }, 10);
     hamburger.classList.add('is-active');
     document.addEventListener('click', outsideClickListener);
+    AOS.refresh(); // Refresh AOS saat menu muncul
   }
 }
 
@@ -323,17 +332,95 @@ function getCachedPosts(db) {
 
 function updateContent() {
   location.reload();
+  AOS.refresh();
 }
 
 function manualRefresh() {
   location.reload();
+  AOS.refresh();
 }
+
+function clearServiceWorkerCache() {
+  if ('caches' in window) {
+    caches.keys().then(names => {
+      for (let name of names) {
+        caches.delete(name);
+      }
+    }).then(() => {
+      console.log('Cache berhasil dibersihkan.');
+      alert('Cache berhasil dibersihkan. Halaman akan dimuat ulang.');
+      location.reload(true);
+      AOS.refresh();
+    });
+  }
+}
+
+// Inisialisasi AOS
+AOS.init({
+  duration: 600,
+  easing: 'ease-out',
+  once: true,
+  offset: 100,
+  disable: function () {
+    return window.innerWidth < 768; // Matikan AOS di mobile
+  },
+  onAnimationStart: () => console.log('AOS animation started!'),
+  onAnimationEnd: () => console.log('AOS animation ended!'),
+});
+
+// GSAP untuk grid items
+document.querySelectorAll('.grid-item').forEach((el, index) => {
+  el.setAttribute('data-aos', 'custom-gsap');
+  el.setAttribute('data-aos-delay', index * 100);
+  el.addEventListener('aos:in', () => {
+    gsap.to(el, {
+      duration: 0.8,
+      y: -20,
+      opacity: 1,
+      ease: 'bounce.out',
+    });
+  });
+});
+
+// IntersectionObserver untuk custom trigger
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('animate-custom');
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1 });
+
+// PixiJS untuk efek partikel di overlay (opsional)
+const app = new PIXI.Application({ transparent: true, width: 600, height: 400 });
+document.getElementById('overlayContent').appendChild(app.view);
+const particles = new PIXI.ParticleContainer();
+app.stage.addChild(particles);
+
+document.getElementById('overlay').addEventListener('aos:in', () => {
+  for (let i = 0; i < 50; i++) {
+    const sprite = PIXI.Sprite.from('path/to/particle.png'); // Ganti dengan path sprite
+    sprite.x = Math.random() * app.screen.width;
+    sprite.y = Math.random() * app.screen.height;
+    sprite.scale.set(0.5);
+    particles.addChild(sprite);
+    gsap.to(sprite, {
+      duration: 2,
+      x: '+=100',
+      y: '+=100',
+      alpha: 0,
+      repeat: -1,
+      ease: 'linear',
+    });
+  }
+});
 
 const updateWorker = new Worker('js/worker.js');
 updateWorker.postMessage('start');
 updateWorker.onmessage = function (e) {
   if (e.data === 'update') {
-    location.reload();
+    document.getElementById('updateNotice').style.display = 'block';
   }
 };
 
@@ -350,3 +437,22 @@ window.addEventListener('hashchange', () => {
 window.addEventListener('load', async () => {
   await loadAllPosts();
 });
+
+// Age gate
+function acceptAge() {
+  localStorage.setItem("ageVerified", "true");
+  document.getElementById("age-warning").classList.remove("show");
+  document.getElementById("blur-background").style.display = "none";
+}
+
+function exitSite() {
+  window.location.href = "https://www.google.com";
+}
+
+window.onload = function () {
+  if (!localStorage.getItem("ageVerified")) {
+    document.getElementById("age-warning").classList.add("show");
+    document.getElementById("blur-background").style.display = "block";
+  }
+  AOS.refresh();
+};
