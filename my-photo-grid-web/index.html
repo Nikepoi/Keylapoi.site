@@ -15,8 +15,6 @@
   <link rel="preconnect" href="https://unpkg.com">
   <!-- GSAP for advanced animations -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <!-- PixiJS for WebGL (opsional, comment kalau ga dipake) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.4.0/pixi.min.js"></script>
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
@@ -161,39 +159,39 @@
   </div>
 
   <div class="warning-notice" style="padding: 1em; background-color: #fff3cd; border: 1px solid #ffeeba; color: #856404; border-radius: 5px; margin: 10px; font-size: 14px;" data-aos="fade-up" data-aos-delay="100">
-    <strong>Peringatan:</strong> Situs ini hanya untuk usia 18+. Kami tidak menyimpan file apapun di server ini. Konten berasal dari sumber pihak ketiga. Jika Anda adalah pemilik hak cipta, silakan hubungi kami untuk permintaan penghapusan.
+    <strong>Peringatan:</strong> Situs ini hanya untuk usia 18+. Kami tidak menyimpan file apapun di server ini. Konten berasal dari sumber pihak ketiga. Jika ketiga adalah Anda, hubungi kami untuk penghapusan.
   </div>
 
-  <nav class="navbar" data-aos="fade-down" data-aos-duration="800">
+  <nav class="navbar" data-static="fade-down" data-aos-duration="800">
     <div class="logo">KEYPOI</div>
     <div style="display: flex; align-items: center; gap: 10px;">
-      <button id="refreshBtn" onclick="manualRefresh()" style="padding: 8px 12px; font-size: 14px; border: none; background-color: #007bff; color: white; border-radius: 5px; cursor: pointer;">
+      <button id="refreshBtn" onclick="manualRefresh()" style="padding: 8px 16px; font-size: 14px; border: none; background-color: #007bff; color: white; border-radius: 3px; cursor: pointer;">
         <i class="fas fa-sync-alt"></i>
       </button>
-      <button id="clearCacheBtn" onclick="clearServiceWorkerCache()" style="padding: 8px 12px; font-size: 14px; border: none; background-color: #dc3545; color: white; border-radius: 5px; cursor: pointer;">
+      <button id="reset" onclick="clearCacheBtn()" style="padding: 8px; font-size: 14px; border: none; background-color: #dc3545; color: white; border-radius: 3px; cursor: pointer;">
         <i class="fas fa-trash-alt"></i>
       </button>
-      <button class="hamburger" onclick="toggleMenu()">
-        <img src="hamburger_menu.svg" alt="Menu" width="30">
+      <button class="navbar-toggle" onclick="toggleNavbar()">
+        <img src="hamburger_menu.svg" alt="Nav Menu" width="24">
       </button>
     </div>
-    <ul class="nav-menu" id="navMenu" data-aos="slide-down" data-aos-delay="200">
-      <button class="close-menu" onclick="toggleMenu()">
-        <img src="close_icon.svg" alt="Close" width="30">
+    <ul class="nav-list" id="navbarMenu" data-aos="slide-down" data-aos-delay="200">
+      <button class="close-btn" onclick="toggleNavbar()">
+        <img src="close_icon.png" alt="Close">
       </button>
-      <li><a href="#beranda" onclick="filterPosts('all')">Halaman utama</a></li>
-      <li><a href="#local" onclick="filterPosts('local')">Bokep local</a></li>
-      <li><a href="#asia" onclick="filterPosts('asia')">Bokep asia</a></li>
-      <li><a href="#barat" onclick="filterPosts('barat')">Bokep barat</a></li>
-      <li><a href="#local_random" onclick="filterPosts('local_random')">Bokep Random local</a></li>
-      <li><a href="#asia_random" onclick="filterPosts('asia_random')">Bokep Random asia</a></li>
-      <li><a href="#barat_random" onclick="filterPosts('barat_random')">Bokep Random Barat</a></li>
-      <li><a href="#jav" onclick="filterPosts('jav')">JAV Sub indo</a></li>
+      <li><a href="#home" onclick="filterPosts('all')">Home</a></li>
+      <li><a href="#local" onclick="filterPosts('local')">Local</a></a></li>
+      <li><a href="#asia" onclick="filterPosts('asia')">Asia</a></a></li>
+      <li><a href="#west" onclick="filterPosts('west')">West</a></a></li>
+      <li><a href="#local_random" onclick="filterPosts('local_random')">Local Random</a></li>
+      <li><a href="#asia_random" onclick="filterPosts('asia_random')">Asia Random</a></li>
+      <li><a href="#west_random" onclick="filterPosts('west_random')">West Random</a></li>
+      <li><a href="#jav" onclick="filterPosts('jav')">JAV Sub</a></li>
     </ul>
   </nav>
 
-  <main class="grid-container" id="postGrid" data-aos="fade-up" data-aos-duration="600">
-    <!-- Grid items di-generate via JS dengan data-aos -->
+  <main class="grid" id="postGrid" data-aos="fade-up" data-aos-duration="600">
+    <!-- Grid items generated via JS with AOS -->
   </main>
 
   <div class="pagination" data-aos="fade-up" data-aos-delay="300">
@@ -203,7 +201,7 @@
 
   <div id="overlay" class="overlay" data-aos="fade-in" data-aos-duration="400" onclick="closeOverlay(event)">
     <div class="overlay-content" id="overlayContent"></div>
-    <button class="close-btn" onclick="closeOverlay(event)">Tutup</button>
+    <button class="close-btn" onclick="closeOverlay(event)">Close</button>
   </div>
 
   <div id="blur-loader" class="blur-loader" style="display: none;" data-aos="fade-in" data-aos-duration="400">
@@ -215,15 +213,15 @@
   </div>
 
   <div id="updateNotice" style="display:none; position:fixed; top:80px; right:20px; background:#333; color:#fff; padding:10px 20px; border-radius:8px; cursor:pointer; z-index:1000; box-shadow:0 2px 5px rgba(0,0,0,0.3);" onclick="updateContent()" data-aos="fade-left" data-aos-delay="500">
-    <i class="fas fa-bell"></i> Klik untuk cek update
+    <i class="fas fa-bell"></i> Check for Updates
   </div>
 
-  <footer class="site-footer" data-aos="fade-up" data-aos-delay="200">
+  <footer class="footer" data-aos="fade-up" data-aos-delay="200">
     <p>&copy; 2025 Keylapoi. All rights reserved.</p>
     <p>
-      Hubungi kami:
+      Contact us:
       <a href="mailto:nikepoiofc@exdonuts.com" style="color: #007bff; text-decoration: none;">
-        klik disini untuk hubungi kami
+        click here to contact us
       </a>
     </p>
   </footer>
@@ -231,5 +229,25 @@
   <!-- Scripts -->
   <script src="js/script.js"></script>
   <script src="https://unpkg.com/aos@3.0.3/aos.js"></script>
+  <script>
+    // Inline error handling
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        AOS.init({
+          duration: 600,
+          easing: 'ease-out',
+          once: true,
+          offset: 100,
+          disable: function () {
+            return window.innerWidth < 768;
+          },
+          onAnimationStart: () => console.log('AOS animation started!'),
+          onAnimationEnd: () => console.log('AOS animation ended!'),
+        });
+      } catch (e) {
+        console.error('AOS initialization failed:', e);
+      }
+    });
+  </script>
 </body>
-</html>
+      </html>
