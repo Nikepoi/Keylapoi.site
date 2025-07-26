@@ -28,6 +28,15 @@
       margin: 0;
       padding: 0;
       scroll-behavior: smooth; /* Smooth scroll */
+      background-color: #f0f0f0;
+      color: #333;
+      line-height: 1.5;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    body.dark-mode {
+      background-color: #121212;
+      color: #ddd;
     }
 
     /* AOS Fallback */
@@ -35,6 +44,7 @@
       opacity: 0;
       transform: translateY(20px);
       transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+      will-change: transform, opacity; /* GPU acceleration */
     }
     [data-aos].aos-animate {
       opacity: 1;
@@ -151,7 +161,7 @@
     </div>
   </div>
 
-  <div style="padding: 1em; background-color: #fff3cd; border: 1px solid #ffeeba; color: #856404; border-radius: 5px; margin: 10px; font-size: 14px;" data-aos="fade-up" data-aos-delay="100">
+  <div class="warning-notice" style="padding: 1em; background-color: #fff3cd; border: 1px solid #ffeeba; color: #856404; border-radius: 5px; margin: 10px; font-size: 14px;" data-aos="fade-up" data-aos-delay="100">
     <strong>Peringatan:</strong> Situs ini hanya untuk usia 18+. Kami tidak menyimpan file apapun di server ini. Konten berasal dari sumber pihak ketiga. Jika Anda adalah pemilik hak cipta, silakan hubungi kami untuk permintaan penghapusan.
   </div>
 
@@ -209,7 +219,7 @@
     <i class="fas fa-bell"></i> Klik untuk cek update
   </div>
 
-  <footer class="site-footer" style="background-color: #f9f9f9; padding: 20px; text-align: center; font-size: 14px; color: #333;" data-aos="fade-up" data-aos-delay="200">
+  <footer class="site-footer" data-aos="fade-up" data-aos-delay="200">
     <p>&copy; 2025 Keylapoi. All rights reserved.</p>
     <p>
       Hubungi kami:
@@ -263,7 +273,7 @@
     document.querySelectorAll('.grid-item').forEach(el => observer.observe(el));
 
     // PixiJS untuk efek partikel di overlay (opsional)
-    const app = new PIXI.Application({ transparent: true });
+    const app = new PIXI.Application({ transparent: true, width: 600, height: 400 });
     document.getElementById('overlayContent').appendChild(app.view);
     const particles = new PIXI.ParticleContainer();
     app.stage.addChild(particles);
@@ -273,6 +283,7 @@
         const sprite = PIXI.Sprite.from('path/to/particle.png'); // Ganti dengan path sprite
         sprite.x = Math.random() * app.screen.width;
         sprite.y = Math.random() * app.screen.height;
+        sprite.scale.set(0.5);
         particles.addChild(sprite);
         gsap.to(sprite, {
           duration: 2,
@@ -343,4 +354,4 @@
     };
   </script>
 </body>
-    </html>
+  </html>
