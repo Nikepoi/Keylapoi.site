@@ -10,10 +10,9 @@
   <meta name="theme-color" content="#000000">
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-  <!-- AOS CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css" />
+
   <style>
     [data-aos] {
       will-change: transform, opacity;
@@ -24,16 +23,11 @@
 </head>
 
 <body>
-
   <nav class="navbar" data-aos="fade-down">
     <div class="logo" data-aos="zoom-in">KEYPOI</div>
     <div style="display: flex; align-items: center; gap: 10px;" data-aos="fade-left">
-      <button id="refreshBtn" onclick="manualRefresh()" style="padding: 8px 12px; font-size: 14px; border: none; background-color: #007bff; color: white; border-radius: 5px; cursor: pointer;">
-        <i class="fas fa-sync-alt"></i>
-      </button>
-      <button id="clearCacheBtn" onclick="clearServiceWorkerCache()" style="padding: 8px 12px; font-size: 14px; border: none; background-color: #dc3545; color: white; border-radius: 5px; cursor: pointer;">
-        <i class="fas fa-trash-alt"></i>
-      </button>
+      <button id="refreshBtn" onclick="manualRefresh()"> <i class="fas fa-sync-alt"></i> </button>
+      <button id="clearCacheBtn" onclick="clearServiceWorkerCache()"> <i class="fas fa-trash-alt"></i> </button>
       <button class="hamburger" onclick="toggleMenu()">
         <img src="hamburger_menu.svg" alt="Menu" width="30">
       </button>
@@ -73,7 +67,8 @@
     <div class="progress-text" id="progressText">0%</div>
   </div>
 
-  <div id="updateNotice" style="display:none; position:fixed; top:80px; right:20px; background:#333; color:#fff; padding:10px 20px; border-radius:8px; cursor:pointer; z-index:1000; box-shadow:0 2px 5px rgba(0,0,0,0.3);" onclick="updateContent()" data-aos="fade-left">
+  <div id="updateNotice" onclick="updateContent()" data-aos="fade-left"
+    style="display:none; position:fixed; top:80px; right:20px; background:#333; color:#fff; padding:10px 20px; border-radius:8px; cursor:pointer; z-index:1000; box-shadow:0 2px 5px rgba(0,0,0,0.3);">
     <i class="fas fa-bell"></i> Klik untuk cek update
   </div>
 
@@ -81,15 +76,37 @@
     <p>© 2025 Keylapoi. All rights reserved.</p>
   </footer>
 
-  <script src="js/script.js"></script>
-  <!-- AOS JS -->
+  <!-- JS -->
   <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
   <script>
-    AOS.init({
-      duration: 1000,
-      easing: 'ease-in-out',
-      once: true,
-      mirror: false
+    document.addEventListener('DOMContentLoaded', () => {
+      AOS.init({
+        duration: 1000,
+        easing: 'ease-in-out',
+        once: true,
+        mirror: false
+      });
+
+      // Service Worker Register
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/serviceworker.js')
+          .then(reg => console.log('Service Worker terdaftar:', reg.scope))
+          .catch(err => console.warn('Service Worker gagal:', err));
+      }
+
+      // Web Worker
+      try {
+        const updateWorker = new Worker('js/worker.js');
+        updateWorker.postMessage('start');
+        updateWorker.onmessage = function (e) {
+          if (e.data === 'update') {
+            const notice = document.getElementById('updateNotice');
+            if (notice) notice.style.display = 'block';
+          }
+        };
+      } catch (err) {
+        console.warn('Worker gagal dimuat:', err);
+      }
     });
 
     function manualRefresh() {
@@ -103,26 +120,13 @@
             caches.delete(name);
           }
         }).then(() => {
-          console.log('Cache berhasil dibersihkan.');
-          alert('Cache berhasil dibersihkan. Halaman akan dimuat ulang.');
+          alert('Cache dibersihkan. Halaman akan dimuat ulang.');
           location.reload(true);
         });
       }
     }
-
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/serviceworker.js')
-        .then(reg => console.log('Service Worker terdaftar:', reg.scope))
-        .catch(err => console.error('Service Worker gagal:', err));
-    }
-
-    const updateWorker = new Worker('js/worker.js');
-    updateWorker.postMessage('start');
-    updateWorker.onmessage = function (e) {
-      if (e.data === 'update') {
-        document.getElementById('updateNotice').style.display = 'block';
-      }
-    };
   </script>
+
+  <script src="js/script.js"></script>
 </body>
-    </html>
+  </html>
