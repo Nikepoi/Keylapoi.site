@@ -12,7 +12,6 @@
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css" />
-
   <style>
     [data-aos] {
       will-change: transform, opacity;
@@ -23,16 +22,16 @@
 </head>
 
 <body>
-  <nav class="navbar" data-aos="fade-down">
-    <div class="logo" data-aos="zoom-in">KEYPOI</div>
-    <div style="display: flex; align-items: center; gap: 10px;" data-aos="fade-left">
-      <button id="refreshBtn" onclick="manualRefresh()"> <i class="fas fa-sync-alt"></i> </button>
-      <button id="clearCacheBtn" onclick="clearServiceWorkerCache()"> <i class="fas fa-trash-alt"></i> </button>
+  <nav class="navbar">
+    <div class="logo">KEYPOI</div>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <button id="refreshBtn" onclick="manualRefresh()"><i class="fas fa-sync-alt"></i></button>
+      <button id="clearCacheBtn" onclick="clearServiceWorkerCache()"><i class="fas fa-trash-alt"></i></button>
       <button class="hamburger" onclick="toggleMenu()">
         <img src="hamburger_menu.svg" alt="Menu" width="30">
       </button>
     </div>
-    <ul class="nav-menu" id="navMenu" data-aos="fade-right">
+    <ul class="nav-menu" id="navMenu">
       <button class="close-menu" onclick="toggleMenu()">
         <img src="close_icon.svg" alt="Close" width="30">
       </button>
@@ -72,7 +71,7 @@
     <i class="fas fa-bell"></i> Klik untuk cek update
   </div>
 
-  <footer class="site-footer" data-aos="fade-up">
+  <footer class="site-footer">
     <p>© 2025 Keylapoi. All rights reserved.</p>
   </footer>
 
