@@ -4,20 +4,30 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Keylapoi</title>
-  <meta name="description" content="Bokep indonesia, bokep jepang, bokep barat, konten viral terbaru, bokep viral terbaru, bokep terbaru, bokep terlengkap tanpa vpn, bokep jepang terbaru , bokep indo terbaru, keylapoi bokep, bokep omek, bokep lesbi, bokep ngewe, ngewe viral">
-  <meta name="keywords" content="Bokep indonesia, bokep jepang, bokep barat, konten viral terbaru, bokep viral terbaru, bokep terbaru, bokep terlengkap tanpa vpn, bokep jepang terbaru , bokep indo terbaru, keylapoi bokep, bokep omek, bokep lesbi, bokep ngewe, ngewe viral">
+  <meta name="description" content="Konten hiburan dewasa lokal, asia, barat, video viral terbaru, update rutin setiap hari, tontonan privat tanpa VPN.">
+  <meta name="keywords" content="konten dewasa lokal, video asia terbaru, hiburan barat, koleksi video privat, tanpa VPN, tontonan viral, update rutin, konten eksklusif keylapoi, hiburan 18+, privat video">
   <meta name="author" content="Keylapoi">
   <meta name="theme-color" content="#000000">
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- AOS CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css" />
+  <style>
+    [data-aos] {
+      will-change: transform, opacity;
+      transform: translateZ(0);
+      backface-visibility: hidden;
+    }
+  </style>
 </head>
 
 <body>
 
-  <nav class="navbar">
-    <div class="logo">KEYPOI</div>
-    <div style="display: flex; align-items: center; gap: 10px;">
+  <nav class="navbar" data-aos="fade-down">
+    <div class="logo" data-aos="zoom-in">KEYPOI</div>
+    <div style="display: flex; align-items: center; gap: 10px;" data-aos="fade-left">
       <button id="refreshBtn" onclick="manualRefresh()" style="padding: 8px 12px; font-size: 14px; border: none; background-color: #007bff; color: white; border-radius: 5px; cursor: pointer;">
         <i class="fas fa-sync-alt"></i>
       </button>
@@ -28,7 +38,7 @@
         <img src="hamburger_menu.svg" alt="Menu" width="30">
       </button>
     </div>
-    <ul class="nav-menu" id="navMenu">
+    <ul class="nav-menu" id="navMenu" data-aos="fade-right">
       <button class="close-menu" onclick="toggleMenu()">
         <img src="close_icon.svg" alt="Close" width="30">
       </button>
@@ -43,14 +53,14 @@
     </ul>
   </nav>
 
-  <main class="grid-container" id="postGrid"></main>
+  <main class="grid-container" id="postGrid" data-aos="fade-up"></main>
 
-  <div class="pagination">
+  <div class="pagination" data-aos="fade-up">
     <button id="prevBtn" onclick="prevPage()"><i class="fas fa-arrow-left"></i> Previous</button>
     <button id="nextBtn" onclick="nextPage()">Next <i class="fas fa-arrow-right"></i></button>
   </div>
 
-  <div id="overlay" class="overlay" onclick="closeOverlay(event)">
+  <div id="overlay" class="overlay" onclick="closeOverlay(event)" data-aos="zoom-in">
     <div class="overlay-content" id="overlayContent"></div>
     <button class="close-btn" onclick="closeOverlay(event)">Tutup</button>
   </div>
@@ -63,16 +73,25 @@
     <div class="progress-text" id="progressText">0%</div>
   </div>
 
-  <div id="updateNotice" style="display:none; position:fixed; top:80px; right:20px; background:#333; color:#fff; padding:10px 20px; border-radius:8px; cursor:pointer; z-index:1000; box-shadow:0 2px 5px rgba(0,0,0,0.3);" onclick="updateContent()">
+  <div id="updateNotice" style="display:none; position:fixed; top:80px; right:20px; background:#333; color:#fff; padding:10px 20px; border-radius:8px; cursor:pointer; z-index:1000; box-shadow:0 2px 5px rgba(0,0,0,0.3);" onclick="updateContent()" data-aos="fade-left">
     <i class="fas fa-bell"></i> Klik untuk cek update
   </div>
 
-  <footer class="site-footer">
+  <footer class="site-footer" data-aos="fade-up">
     <p>© 2025 Keylapoi. All rights reserved.</p>
   </footer>
 
   <script src="js/script.js"></script>
+  <!-- AOS JS -->
+  <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
   <script>
+    AOS.init({
+      duration: 1000,
+      easing: 'ease-in-out',
+      once: true,
+      mirror: false
+    });
+
     function manualRefresh() {
       location.reload();
     }
@@ -106,4 +125,4 @@
     };
   </script>
 </body>
-</html>
+    </html>
