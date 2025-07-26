@@ -7,10 +7,19 @@
   <meta name="author" content="Keylapoi">
   <meta name="theme-color" content="#000000">
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <!-- AOS CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/aos@3.0.3/aos.css" />
+  <!-- Preload critical assets -->
+  <link rel="preload" href="https://unpkg.com/aos@3.0.3/aos.css" as="style">
+  <link rel="preload" href="https://unpkg.com/aos@3.0.3/aos.js" as="script">
+  <link rel="preconnect" href="https://unpkg.com">
+  <!-- GSAP for advanced animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <!-- PixiJS for WebGL (opsional, comment kalau ga dipake) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.4.0/pixi.min.js"></script>
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-  
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 
@@ -18,6 +27,28 @@
       font-family: 'Poppins', sans-serif;
       margin: 0;
       padding: 0;
+      scroll-behavior: smooth; /* Smooth scroll */
+    }
+
+    /* AOS Fallback */
+    [data-aos] {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+    [data-aos].aos-animate {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Battery-saving mode */
+    @media (prefers-reduced-data: reduce) {
+      [data-aos] { animation: none !important; }
+    }
+
+    /* Optimize mobile */
+    @media (max-width: 768px) {
+      .grid-item { transform: none !important; }
     }
 
     #age-warning {
@@ -88,14 +119,30 @@
       z-index: 9998;
       display: none;
     }
+
+    /* Custom animation class for IntersectionObserver */
+    .grid-item {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.6s ease-out;
+    }
+    .grid-item.animate-custom {
+      opacity: 1;
+      transform: translateY(0);
+    }
   </style>
+
+  <!-- Fallback untuk no-JS -->
+  <noscript>
+    <style>
+      [data-aos] { opacity: 1; transform: none; }
+    </style>
+  </noscript>
 </head>
 
 <body>
-
-
   <div id="blur-background"></div>
-  <div id="age-warning">
+  <div id="age-warning" data-aos="zoom-in" data-aos-duration="500">
     <h2>PERINGATAN!</h2>
     <p>Website ini mengandung konten dewasa. Anda harus berusia 18 tahun ke atas untuk mengaksesnya.</p>
     <div class="warning-buttons">
@@ -104,12 +151,11 @@
     </div>
   </div>
 
-  
-  <div style="padding: 1em; background-color: #fff3cd; border: 1px solid #ffeeba; color: #856404; border-radius: 5px; margin: 10px; font-size: 14px;">
+  <div style="padding: 1em; background-color: #fff3cd; border: 1px solid #ffeeba; color: #856404; border-radius: 5px; margin: 10px; font-size: 14px;" data-aos="fade-up" data-aos-delay="100">
     <strong>Peringatan:</strong> Situs ini hanya untuk usia 18+. Kami tidak menyimpan file apapun di server ini. Konten berasal dari sumber pihak ketiga. Jika Anda adalah pemilik hak cipta, silakan hubungi kami untuk permintaan penghapusan.
   </div>
 
-  <nav class="navbar">
+  <nav class="navbar" data-aos="fade-down" data-aos-duration="800">
     <div class="logo">KEYPOI</div>
     <div style="display: flex; align-items: center; gap: 10px;">
       <button id="refreshBtn" onclick="manualRefresh()" style="padding: 8px 12px; font-size: 14px; border: none; background-color: #007bff; color: white; border-radius: 5px; cursor: pointer;">
@@ -122,7 +168,7 @@
         <img src="hamburger_menu.svg" alt="Menu" width="30">
       </button>
     </div>
-    <ul class="nav-menu" id="navMenu">
+    <ul class="nav-menu" id="navMenu" data-aos="slide-down" data-aos-delay="200">
       <button class="close-menu" onclick="toggleMenu()">
         <img src="close_icon.svg" alt="Close" width="30">
       </button>
@@ -137,19 +183,21 @@
     </ul>
   </nav>
 
-  <main class="grid-container" id="postGrid"></main>
+  <main class="grid-container" id="postGrid" data-aos="fade-up" data-aos-duration="600">
+    <!-- Grid items di-generate via JS dengan data-aos -->
+  </main>
 
-  <div class="pagination">
+  <div class="pagination" data-aos="fade-up" data-aos-delay="300">
     <button id="prevBtn" onclick="prevPage()"><i class="fas fa-arrow-left"></i> Previous</button>
     <button id="nextBtn" onclick="nextPage()">Next <i class="fas fa-arrow-right"></i></button>
   </div>
 
-  <div id="overlay" class="overlay" onclick="closeOverlay(event)">
+  <div id="overlay" class="overlay" data-aos="fade-in" data-aos-duration="400" onclick="closeOverlay(event)">
     <div class="overlay-content" id="overlayContent"></div>
     <button class="close-btn" onclick="closeOverlay(event)">Tutup</button>
   </div>
 
-  <div id="blur-loader" class="blur-loader" style="display: none;">
+  <div id="blur-loader" class="blur-loader" style="display: none;" data-aos="fade-in" data-aos-duration="400">
     <div class="spinner"></div>
     <div class="progress-bar">
       <div class="progress-fill" id="progressFill"></div>
@@ -157,26 +205,93 @@
     <div class="progress-text" id="progressText">0%</div>
   </div>
 
-  <div id="updateNotice" style="display:none; position:fixed; top:80px; right:20px; background:#333; color:#fff; padding:10px 20px; border-radius:8px; cursor:pointer; z-index:1000; box-shadow:0 2px 5px rgba(0,0,0,0.3);" onclick="updateContent()">
+  <div id="updateNotice" style="display:none; position:fixed; top:80px; right:20px; background:#333; color:#fff; padding:10px 20px; border-radius:8px; cursor:pointer; z-index:1000; box-shadow:0 2px 5px rgba(0,0,0,0.3);" onclick="updateContent()" data-aos="fade-left" data-aos-delay="500">
     <i class="fas fa-bell"></i> Klik untuk cek update
   </div>
 
-  <footer class="site-footer" style="background-color: #f9f9f9; padding: 20px; text-align: center; font-size: 14px; color: #333;">
-  <p>&copy; 2025 Keylapoi. All rights reserved.</p>
-  <p>
-    Hubungi kami:
-    <a href="mailto:nikepoiofc@exdonuts.com" style="color: #007bff; text-decoration: none;">
-      klik disini untuk hubungi kami
-    </a>
-  </p>
+  <footer class="site-footer" style="background-color: #f9f9f9; padding: 20px; text-align: center; font-size: 14px; color: #333;" data-aos="fade-up" data-aos-delay="200">
+    <p>&copy; 2025 Keylapoi. All rights reserved.</p>
+    <p>
+      Hubungi kami:
+      <a href="mailto:nikepoiofc@exdonuts.com" style="color: #007bff; text-decoration: none;">
+        klik disini untuk hubungi kami
+      </a>
+    </p>
   </footer>
-  <!-- Script -->
+
+  <!-- Scripts -->
   <script src="js/script.js"></script>
+  <script src="https://unpkg.com/aos@3.0.3/aos.js"></script>
   <script>
+    // Inisialisasi AOS
+    AOS.init({
+      duration: 600,
+      easing: 'ease-out',
+      once: true,
+      offset: 100,
+      disable: function () {
+        return window.innerWidth < 768; // Matikan AOS di mobile
+      },
+      onAnimationStart: () => console.log('AOS animation started!'),
+      onAnimationEnd: () => console.log('AOS animation ended!'),
+    });
+
+    // GSAP untuk grid items
+    document.querySelectorAll('.grid-item').forEach((el, index) => {
+      el.setAttribute('data-aos', 'custom-gsap');
+      el.setAttribute('data-aos-delay', index * 100); // Staggered delay
+      el.addEventListener('aos:in', () => {
+        gsap.to(el, {
+          duration: 0.8,
+          y: -20,
+          opacity: 1,
+          ease: 'bounce.out',
+        });
+      });
+    });
+
+    // IntersectionObserver untuk custom trigger
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate-custom');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.grid-item').forEach(el => observer.observe(el));
+
+    // PixiJS untuk efek partikel di overlay (opsional)
+    const app = new PIXI.Application({ transparent: true });
+    document.getElementById('overlayContent').appendChild(app.view);
+    const particles = new PIXI.ParticleContainer();
+    app.stage.addChild(particles);
+
+    document.getElementById('overlay').addEventListener('aos:in', () => {
+      for (let i = 0; i < 50; i++) {
+        const sprite = PIXI.Sprite.from('path/to/particle.png'); // Ganti dengan path sprite
+        sprite.x = Math.random() * app.screen.width;
+        sprite.y = Math.random() * app.screen.height;
+        particles.addChild(sprite);
+        gsap.to(sprite, {
+          duration: 2,
+          x: '+=100',
+          y: '+=100',
+          alpha: 0,
+          repeat: -1,
+          ease: 'linear',
+        });
+      }
+    });
+
+    // Manual refresh
     function manualRefresh() {
       location.reload();
+      AOS.refresh();
     }
 
+    // Clear service worker cache
     function clearServiceWorkerCache() {
       if ('caches' in window) {
         caches.keys().then(names => {
@@ -187,16 +302,19 @@
           console.log('Cache berhasil dibersihkan.');
           alert('Cache berhasil dibersihkan. Halaman akan dimuat ulang.');
           location.reload(true);
+          AOS.refresh();
         });
       }
     }
 
+    // Service worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/serviceworker.js')
         .then(reg => console.log('Service Worker terdaftar:', reg.scope))
         .catch(err => console.error('Service Worker gagal:', err));
     }
 
+    // Update worker
     const updateWorker = new Worker('js/worker.js');
     updateWorker.postMessage('start');
     updateWorker.onmessage = function (e) {
@@ -205,7 +323,7 @@
       }
     };
 
-    // Age Gate Script
+    // Age gate
     function acceptAge() {
       localStorage.setItem("ageVerified", "true");
       document.getElementById("age-warning").classList.remove("show");
@@ -221,7 +339,8 @@
         document.getElementById("age-warning").classList.add("show");
         document.getElementById("blur-background").style.display = "block";
       }
+      AOS.refresh(); // Refresh AOS setelah load
     };
   </script>
 </body>
-            </html>
+    </html>
