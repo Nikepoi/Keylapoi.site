@@ -27,7 +27,7 @@
       font-family: 'Poppins', sans-serif;
       margin: 0;
       padding: 0;
-      scroll-behavior: smooth; /* Smooth scroll */
+      scroll-behavior: smooth;
       background-color: #f0f0f0;
       color: #333;
       line-height: 1.5;
@@ -44,7 +44,7 @@
       opacity: 0;
       transform: translateY(20px);
       transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-      will-change: transform, opacity; /* GPU acceleration */
+      will-change: transform, opacity;
     }
     [data-aos].aos-animate {
       opacity: 1;
@@ -142,7 +142,6 @@
     }
   </style>
 
-  <!-- Fallback untuk no-JS -->
   <noscript>
     <style>
       [data-aos] { opacity: 1; transform: none; }
@@ -232,126 +231,5 @@
   <!-- Scripts -->
   <script src="js/script.js"></script>
   <script src="https://unpkg.com/aos@3.0.3/aos.js"></script>
-  <script>
-    // Inisialisasi AOS
-    AOS.init({
-      duration: 600,
-      easing: 'ease-out',
-      once: true,
-      offset: 100,
-      disable: function () {
-        return window.innerWidth < 768; // Matikan AOS di mobile
-      },
-      onAnimationStart: () => console.log('AOS animation started!'),
-      onAnimationEnd: () => console.log('AOS animation ended!'),
-    });
-
-    // GSAP untuk grid items
-    document.querySelectorAll('.grid-item').forEach((el, index) => {
-      el.setAttribute('data-aos', 'custom-gsap');
-      el.setAttribute('data-aos-delay', index * 100); // Staggered delay
-      el.addEventListener('aos:in', () => {
-        gsap.to(el, {
-          duration: 0.8,
-          y: -20,
-          opacity: 1,
-          ease: 'bounce.out',
-        });
-      });
-    });
-
-    // IntersectionObserver untuk custom trigger
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('animate-custom');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.1 });
-
-    document.querySelectorAll('.grid-item').forEach(el => observer.observe(el));
-
-    // PixiJS untuk efek partikel di overlay (opsional)
-    const app = new PIXI.Application({ transparent: true, width: 600, height: 400 });
-    document.getElementById('overlayContent').appendChild(app.view);
-    const particles = new PIXI.ParticleContainer();
-    app.stage.addChild(particles);
-
-    document.getElementById('overlay').addEventListener('aos:in', () => {
-      for (let i = 0; i < 50; i++) {
-        const sprite = PIXI.Sprite.from('path/to/particle.png'); // Ganti dengan path sprite
-        sprite.x = Math.random() * app.screen.width;
-        sprite.y = Math.random() * app.screen.height;
-        sprite.scale.set(0.5);
-        particles.addChild(sprite);
-        gsap.to(sprite, {
-          duration: 2,
-          x: '+=100',
-          y: '+=100',
-          alpha: 0,
-          repeat: -1,
-          ease: 'linear',
-        });
-      }
-    });
-
-    // Manual refresh
-    function manualRefresh() {
-      location.reload();
-      AOS.refresh();
-    }
-
-    // Clear service worker cache
-    function clearServiceWorkerCache() {
-      if ('caches' in window) {
-        caches.keys().then(names => {
-          for (let name of names) {
-            caches.delete(name);
-          }
-        }).then(() => {
-          console.log('Cache berhasil dibersihkan.');
-          alert('Cache berhasil dibersihkan. Halaman akan dimuat ulang.');
-          location.reload(true);
-          AOS.refresh();
-        });
-      }
-    }
-
-    // Service worker
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/serviceworker.js')
-        .then(reg => console.log('Service Worker terdaftar:', reg.scope))
-        .catch(err => console.error('Service Worker gagal:', err));
-    }
-
-    // Update worker
-    const updateWorker = new Worker('js/worker.js');
-    updateWorker.postMessage('start');
-    updateWorker.onmessage = function (e) {
-      if (e.data === 'update') {
-        document.getElementById('updateNotice').style.display = 'block';
-      }
-    };
-
-    // Age gate
-    function acceptAge() {
-      localStorage.setItem("ageVerified", "true");
-      document.getElementById("age-warning").classList.remove("show");
-      document.getElementById("blur-background").style.display = "none";
-    }
-
-    function exitSite() {
-      window.location.href = "https://www.google.com";
-    }
-
-    window.onload = function () {
-      if (!localStorage.getItem("ageVerified")) {
-        document.getElementById("age-warning").classList.add("show");
-        document.getElementById("blur-background").style.display = "block";
-      }
-      AOS.refresh(); // Refresh AOS setelah load
-    };
-  </script>
 </body>
-  </html>
+</html>
